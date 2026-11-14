@@ -1,0 +1,1826 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UF Fall 2026 成绩看板</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:opsz,wght@14..32,400..600&display=swap">
+<style>
+/* Layout: 暖奶油画布 + 暖墨色 + 唯一的珊瑚色强调。标题和大数字用衬线体，界面文字用无衬线体；五门课只用低饱和的灰调色相，出现在小色点、细边和时间线浅色条上，卡片本身保持奶油白 */
+:root {
+  /* 画布与卡片 */
+  --bg: #F4F0E7; --bg-card: #FBFAF6; --bg-pop: #FFFEFB;
+  --card-border: #E5DED1;
+  --topbar-bg: rgba(244,240,231,.86); --topbar-line: #E5DED1;
+  --sync-bg: #FBFAF6;
+  --logo-bg: #1A1915; --logo-fg: #FBFAF6;
+  /* 墨色 */
+  --text-1: #1A1915; --text-2: #3D3C38; --text-3: #6C6A64; --text-4: #A8A399;
+  --fill-1: #F6F2EA; --fill-2: #EFEAE0; --fill-3: #E5DED2; --fill-4: #C9C1B3;
+  --border-1: #EDE7DC; --border-2: #E3DCCF; --border-3: #CBC2B3;
+  --tag-strong: #E9E2D4;
+  /* 珊瑚色：唯一的强调色 */
+  --primary: #A9502F; --primary-hover: #8F4428; --primary-press: #8C4029;
+  --primary-fill: #B5573A; --primary-fill-hover: #A64C30;
+  --primary-light: #F6E8E1; --primary-light-2: #E5BDAC;
+  --accent: #C96442;
+  --btn-line: #D9D0C1;
+  --on-fill: #FFFFFF; --on-status: #FFFFFF;
+  /* 语义色：低饱和的泥土色调 */
+  --success: #6E865F; --success-t: #476039; --success-light: #E8EDE1;
+  --warning: #BA8B45; --warning-t: #765523; --warning-light: #F5ECDC;
+  --danger: #A34E43; --danger-t: #7E352B; --danger-light: #F5E3DF; --danger-fill: #A34E43;
+  /* 五门课：灰调色相，亮度接近 */
+  --c-blue: #617B9E; --c-blue-l: #DCE1E4; --c-blue-t: #33455B;
+  --c-purple: #906F95; --c-purple-l: #E6DEE3; --c-purple-t: #513A55;
+  --c-cyan: #557C74; --c-cyan-l: #DAE1DC; --c-cyan-t: #375851;
+  --c-gold: #947A4C; --c-gold-l: #E6E0D4; --c-gold-t: #614E2E;
+  --c-magenta: #A97075; --c-magenta-l: #EBDEDC; --c-magenta-t: #5C3337;
+  --on-cc: #FFFFFF;
+  --now-mix: 34%; --now-t-mix: 100%;
+  /* 倒计时卡 */
+  --hero-bg: #EEE6D7; --hero-line: #E2D8C6;
+  --hero-text: #1A1915; --hero-sub: #5E5B54;
+  --hero-num: #C15F3C; --hero-fill: #C96442;
+  --hero-track: rgba(26,25,21,.10); --hero-mark: rgba(26,25,21,.38);
+  --hero-glow: rgba(214,128,96,.24); --hero-glow-2: rgba(255,253,247,.75);
+  --plane: #C96442; --plane-op: .55;
+  /* 时间线 */
+  --g-band: rgba(26,25,21,.055);
+  --flight-line: rgba(26,25,21,.50);
+  --flag-ink: #2A2926; --flag-ink-t: #FBFAF6;
+  --legend-now: #DCD4C6;
+  --stripe: rgba(255,255,255,.55);
+  --tip-bg: #2A2926; --tip-text: #F4F1EA; --tip-line: rgba(255,255,255,0);
+  /* 阴影：极少使用，层次主要靠色块 */
+  --shadow-1: 0 1px 2px rgba(60,45,20,.04);
+  --shadow-2: 0 10px 24px -10px rgba(60,45,20,.18), 0 2px 5px rgba(60,45,20,.05);
+  --shadow-3: 0 18px 40px -14px rgba(60,45,20,.26), 0 4px 10px -4px rgba(60,45,20,.08);
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --ease-io: cubic-bezier(.45, 0, .55, 1);
+  --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-num: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-serif: "Cormorant Garamond", "EB Garamond", Garamond, Georgia, "Songti SC", "Noto Serif SC", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --r-xs: 4px; --r-s: 6px; --r-m: 8px; --r-l: 12px; --r-xl: 16px; --r-pill: 9999px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1F1E1C; --bg-card: #282725; --bg-pop: #312F2D;
+    --card-border: #363431;
+    --topbar-bg: rgba(31,30,28,.84); --topbar-line: #34322F;
+    --sync-bg: #282725;
+    --logo-bg: #F0EDE6; --logo-fg: #1F1E1C;
+    --text-1: #F0EDE6; --text-2: #C8C3B8; --text-3: #9A958B; --text-4: #625E57;
+    --fill-1: #2D2C29; --fill-2: #33312E; --fill-3: #3D3B37; --fill-4: #5A5751;
+    --border-1: #312F2C; --border-2: #3A3835; --border-3: #514E48;
+    --tag-strong: #3A3834;
+    --primary: #E08A6B; --primary-hover: #EA9C80; --primary-press: #B5573A;
+    --primary-fill: #B85A3A; --primary-fill-hover: #AD5233;
+    --primary-light: rgba(217,119,87,.15); --primary-light-2: rgba(217,119,87,.46);
+    --accent: #D97757;
+    --btn-line: #4A4743;
+    --success: #97AC8B; --success-t: #BED0B4; --success-light: #3A3C35;
+    --warning: #D0B080; --warning-t: #E2C8A2; --warning-light: #433D34;
+    --danger: #C57C72; --danger-t: #DFABA4; --danger-light: #413531; --danger-fill: #A9493B;
+    --c-blue: #92A3B9; --c-blue-l: #3F4246; --c-blue-t: #BFCAD9;
+    --c-purple: #B19DB4; --c-purple-l: #464144; --c-purple-t: #D2C3D5;
+    --c-cyan: #7CA29A; --c-cyan-l: #3A423F; --c-cyan-t: #C1D7D2;
+    --c-gold: #B69F77; --c-gold-l: #474137; --c-gold-t: #DDD1BB;
+    --c-magenta: #C4A1A4; --c-magenta-l: #4A4241; --c-magenta-t: #DABEC1;
+    --on-cc: #1F1E1C; --on-status: #1F1E1C;
+    --now-mix: 40%; --now-t-mix: 30%;
+    --hero-bg: #2C2A27; --hero-line: #3A3733;
+    --hero-text: #F0EDE6; --hero-sub: #B3AEA3;
+    --hero-num: #E08A6B; --hero-fill: #D97757;
+    --hero-track: rgba(240,237,230,.11); --hero-mark: rgba(240,237,230,.42);
+    --hero-glow: rgba(217,119,87,.13); --hero-glow-2: rgba(240,237,230,.025);
+    --plane: #D97757; --plane-op: .45;
+    --g-band: rgba(240,237,230,.05);
+    --flight-line: rgba(240,237,230,.50);
+    --flag-ink: #F0EDE6; --flag-ink-t: #1F1E1C;
+    --legend-now: #57534D;
+    --stripe: rgba(0,0,0,.22);
+    --tip-bg: #3A3835; --tip-text: #F0EDE6; --tip-line: rgba(240,237,230,.08);
+    --shadow-1: 0 1px 2px rgba(0,0,0,.22);
+    --shadow-2: 0 12px 28px -10px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.25);
+    --shadow-3: 0 20px 44px -14px rgba(0,0,0,.66), 0 6px 14px -6px rgba(0,0,0,.40);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1F1E1C; --bg-card: #282725; --bg-pop: #312F2D;
+  --card-border: #363431;
+  --topbar-bg: rgba(31,30,28,.84); --topbar-line: #34322F;
+  --sync-bg: #282725;
+  --logo-bg: #F0EDE6; --logo-fg: #1F1E1C;
+  --text-1: #F0EDE6; --text-2: #C8C3B8; --text-3: #9A958B; --text-4: #625E57;
+  --fill-1: #2D2C29; --fill-2: #33312E; --fill-3: #3D3B37; --fill-4: #5A5751;
+  --border-1: #312F2C; --border-2: #3A3835; --border-3: #514E48;
+  --tag-strong: #3A3834;
+  --primary: #E08A6B; --primary-hover: #EA9C80; --primary-press: #B5573A;
+  --primary-fill: #B85A3A; --primary-fill-hover: #AD5233;
+  --primary-light: rgba(217,119,87,.15); --primary-light-2: rgba(217,119,87,.46);
+  --accent: #D97757;
+  --btn-line: #4A4743;
+  --success: #97AC8B; --success-t: #BED0B4; --success-light: #3A3C35;
+  --warning: #D0B080; --warning-t: #E2C8A2; --warning-light: #433D34;
+  --danger: #C57C72; --danger-t: #DFABA4; --danger-light: #413531; --danger-fill: #A9493B;
+  --c-blue: #92A3B9; --c-blue-l: #3F4246; --c-blue-t: #BFCAD9;
+  --c-purple: #B19DB4; --c-purple-l: #464144; --c-purple-t: #D2C3D5;
+  --c-cyan: #7CA29A; --c-cyan-l: #3A423F; --c-cyan-t: #C1D7D2;
+  --c-gold: #B69F77; --c-gold-l: #474137; --c-gold-t: #DDD1BB;
+  --c-magenta: #C4A1A4; --c-magenta-l: #4A4241; --c-magenta-t: #DABEC1;
+  --on-cc: #1F1E1C; --on-status: #1F1E1C;
+  --now-mix: 40%; --now-t-mix: 30%;
+  --hero-bg: #2C2A27; --hero-line: #3A3733;
+  --hero-text: #F0EDE6; --hero-sub: #B3AEA3;
+  --hero-num: #E08A6B; --hero-fill: #D97757;
+  --hero-track: rgba(240,237,230,.11); --hero-mark: rgba(240,237,230,.42);
+  --hero-glow: rgba(217,119,87,.13); --hero-glow-2: rgba(240,237,230,.025);
+  --plane: #D97757; --plane-op: .45;
+  --g-band: rgba(240,237,230,.05);
+  --flight-line: rgba(240,237,230,.50);
+  --flag-ink: #F0EDE6; --flag-ink-t: #1F1E1C;
+  --legend-now: #57534D;
+  --stripe: rgba(0,0,0,.22);
+  --tip-bg: #3A3835; --tip-text: #F0EDE6; --tip-line: rgba(240,237,230,.08);
+  --shadow-1: 0 1px 2px rgba(0,0,0,.22);
+  --shadow-2: 0 12px 28px -10px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.25);
+  --shadow-3: 0 20px 44px -14px rgba(0,0,0,.66), 0 6px 14px -6px rgba(0,0,0,.40);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-1); font-family: var(--font); font-size: 14px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+button { font: inherit; color: inherit; }
+a { color: var(--primary); text-decoration: none; transition: color .2s var(--ease); }
+a:hover { color: var(--primary-hover); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+/* ---------- 顶栏 + Tabs ---------- */
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--topbar-bg); -webkit-backdrop-filter: saturate(1.2) blur(14px); backdrop-filter: saturate(1.2) blur(14px); border-bottom: 1px solid var(--topbar-line); }
+.wrap { max-width: 1320px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 16px 8px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.logo { width: 34px; height: 34px; border-radius: var(--r-m); background: var(--logo-bg); display: grid; place-items: center; flex: none; }
+.logo svg { width: 18px; height: 18px; stroke: var(--logo-fg); }
+.brand-title { font-family: var(--font-serif); font-size: 20px; font-weight: 500; letter-spacing: -0.005em; font-variant-numeric: lining-nums; line-height: 1.2; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-sub { font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.sync { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 13px; border-radius: var(--r-pill); background: var(--sync-bg); border: 1px solid var(--border-2); color: var(--text-2); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sync .dot { --pulse: var(--success); width: 7px; height: 7px; border-radius: 50%; background: var(--pulse); box-shadow: 0 0 0 0 var(--pulse); animation: pulse 2.4s var(--ease) infinite; flex: none; }
+.sync.stale .dot { --pulse: var(--warning); }
+.sync.busy .dot { --pulse: var(--primary); }
+.top-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: var(--r-m); border: 1px solid var(--btn-line); background: var(--bg-card); color: var(--text-1); font-size: 13.5px; font-weight: 500; line-height: 1; white-space: nowrap; cursor: pointer; transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease), transform .15s var(--ease); }
+.btn:hover { background: var(--fill-2); border-color: var(--border-3); color: var(--text-1); text-decoration: none; }
+.btn:active { transform: scale(.98); }
+.btn svg { color: var(--text-3); }
+.btn.btn-primary { height: 34px; padding: 0 16px; font-size: 14px; background: var(--primary-fill); border-color: var(--primary-fill); color: var(--on-fill); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--on-fill) 14%, transparent); }
+.btn.btn-primary svg { color: inherit; }
+.btn.btn-primary:hover { background: var(--primary-fill-hover); border-color: var(--primary-fill-hover); color: var(--on-fill); }
+.btn.btn-primary:active { transform: scale(.97); background: var(--primary-press); border-color: var(--primary-press); }
+.btn.btn-primary:disabled { opacity: .8; cursor: progress; }
+.btn .ri { width: 14px; height: 14px; flex: none; }
+.btn.busy .ri { animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+/* 提示条 */
+#app.static *, #app.static *::before, #app.static *::after { animation: none !important; }
+.toasts { position: fixed; z-index: 60; top: calc(env(safe-area-inset-top, 0px) + 112px); left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; width: max-content; max-width: calc(100vw - 32px); pointer-events: none; }
+.toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 10px; max-width: 520px; padding: 13px 16px; border-radius: var(--r-l); background: var(--bg-pop); border: 1px solid var(--card-border); box-shadow: var(--shadow-3); color: var(--text-1); font-size: 14px; animation: toastIn .36s var(--ease); }
+.toast.out { animation: toastOut .25s var(--ease) forwards; }
+.toast .ti { flex: none; width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; display: grid; place-items: center; color: var(--on-fill); font-size: 11px; font-weight: 700; font-style: normal; line-height: 1; }
+.toast.success .ti { background: var(--success); color: var(--on-status); } .toast.info .ti { background: var(--primary-fill); }
+.toast.warning .ti { background: var(--warning); color: var(--on-status); } .toast.error .ti { background: var(--danger-fill); }
+.toast-t { font-weight: 600; }
+.toast-d { color: var(--text-2); font-size: 13px; margin-top: 2px; }
+.toast ul { margin: 4px 0 0; padding-left: 16px; color: var(--text-2); font-size: 13px; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(-10px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(-8px) scale(.98); } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--pulse, var(--success)) 50%, transparent); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+.tabs { position: relative; display: flex; gap: 28px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 12px 0 14px; border: 0; background: none; cursor: pointer; color: var(--text-2); font-size: 14px; font-weight: 500; white-space: nowrap; transition: color .2s var(--ease); }
+.tab:hover { color: var(--text-1); }
+.tab[aria-selected="true"] { color: var(--text-1); }
+.tab .tdot { width: 7px; height: 7px; border-radius: 50%; background: var(--cc, var(--primary)); }
+.tab .tcode { color: var(--text-3); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.tab[aria-selected="true"] .tcode { color: var(--text-3); }
+.ink { position: absolute; bottom: 0; height: 2px; border-radius: 2px 2px 0 0; background: var(--accent); transition: left .35s var(--ease), width .35s var(--ease); pointer-events: none; }
+
+/* ---------- 面板 ---------- */
+main { padding-block: 28px 56px; }
+.panel { display: none; }
+.panel.active { display: block; animation: panelIn .5s var(--ease); }
+@keyframes panelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.stack { display: grid; gap: 22px; }
+.card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: var(--r-l); padding: 26px; min-width: 0; box-shadow: var(--shadow-1); }
+.card-h { display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.card-t { font-family: var(--font-serif); font-size: 21px; font-weight: 500; line-height: 1.3; letter-spacing: -0.005em; font-variant-numeric: lining-nums; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
+.card-sub { font-size: 12.5px; color: var(--text-3); font-weight: 400; line-height: 1.55; margin-top: 4px; }
+.muted { color: var(--text-3); }
+.small { font-size: 12px; }
+
+/* 标签：中性底色的胶囊，只有承载含义时才带颜色 */
+.tag { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 9px; border-radius: var(--r-pill); font-size: 12px; font-weight: 500; line-height: 22px; white-space: nowrap; font-variant-numeric: tabular-nums; background: var(--fill-2); color: var(--text-2); }
+.tag.blue { background: var(--tag-strong); color: var(--text-1); }
+.tag.green { background: var(--success-light); color: var(--success-t); }
+.tag.orange { background: var(--warning-light); color: var(--warning-t); }
+.tag.red { background: var(--danger-light); color: var(--danger-t); }
+.tag.dashed { background: transparent; border: 1px dashed var(--border-3); color: var(--text-3); line-height: 20px; }
+.tag.course { background: var(--cc-l); color: var(--cc-t); }
+
+/* ---------- 概览 ---------- */
+.ov-hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 22px; }
+/* 倒计时卡：深一级的奶油色块，右上角一团柔和的暖光，珊瑚色线描飞机 */
+.card.flight { position: relative; overflow: hidden; isolation: isolate; display: flex; flex-direction: column; border-radius: var(--r-xl); background: var(--hero-bg); border-color: var(--hero-line); color: var(--hero-text); box-shadow: none; padding: 28px 32px 26px; min-height: 296px; }
+.card.flight::before { content: ""; position: absolute; z-index: -1; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(58% 85% at 92% 0%, var(--hero-glow) 0%, transparent 72%),
+    radial-gradient(70% 70% at 0% 100%, var(--hero-glow-2) 0%, transparent 72%); }
+.card.flight .card-t { font-size: 23px; color: var(--hero-text); }
+.card.flight .card-sub { color: var(--hero-sub); font-size: 13px; }
+.flight-plane { position: absolute; z-index: -1; right: 26px; top: 22px; width: 156px; height: 156px; opacity: var(--plane-op); pointer-events: none; transform: rotate(40deg); animation: drift 11s var(--ease-io) infinite alternate; }
+.flight-plane svg { display: block; width: 100%; height: 100%; fill: none; stroke: var(--plane); stroke-width: .28px; stroke-linejoin: round; }
+@keyframes drift { from { transform: translate(0,0) rotate(38deg); } to { transform: translate(-10px, 8px) rotate(42deg); } }
+.cd { display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap; margin-top: 20px; margin-bottom: 28px; position: relative; }
+.cd-unit { display: flex; flex-direction: column; }
+.cd-num { font-family: var(--font-serif); font-size: 62px; line-height: .92; font-weight: 500; letter-spacing: -0.015em; font-variant-numeric: lining-nums tabular-nums; color: var(--hero-text); }
+.cd-unit.days .cd-num { font-size: 124px; letter-spacing: -0.035em; margin-left: -5px; padding-right: 6px; color: var(--hero-num); }
+.cd-lab { font-size: 12px; font-weight: 500; color: var(--hero-sub); margin-top: 10px; letter-spacing: .12em; }
+.track { position: relative; height: 4px; border-radius: var(--r-pill); background: var(--hero-track); margin-top: auto; }
+.track-fill { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--hero-fill); animation: trackIn 1.4s var(--ease) both; }
+.track-fill::after { content: ""; position: absolute; right: -7px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: var(--hero-bg); border: 2px solid var(--hero-fill); box-shadow: 0 0 0 4px color-mix(in srgb, var(--hero-fill) 16%, transparent); box-sizing: border-box; }
+.track-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--hero-sub); font-variant-numeric: tabular-nums; margin-top: 12px; gap: 8px; flex-wrap: wrap; }
+.track-mark { position: absolute; top: -5px; width: 2px; height: 14px; background: var(--hero-mark); border-radius: 1px; }
+@keyframes trackIn { from { width: 0; } }
+@keyframes reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+.ov-kpis { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.kpi { background: var(--fill-1); border: 1px solid var(--border-1); border-radius: var(--r-m); padding: 16px 18px 15px; transition: border-color .2s var(--ease); }
+.kpi:hover { border-color: var(--border-3); }
+.kpi-l { font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+.kpi-v { font-family: var(--font-serif); font-size: 44px; font-weight: 500; line-height: 1.02; letter-spacing: -0.02em; margin-top: 8px; font-variant-numeric: lining-nums tabular-nums; color: var(--text-1); }
+.kpi-v small { font-size: 13px; color: var(--text-3); font-weight: 400; margin-left: 5px; letter-spacing: 0; font-family: var(--font); }
+.kpi-d { font-size: 12px; color: var(--text-3); margin-top: 6px; font-variant-numeric: tabular-nums; }
+
+.ccards { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 16px; }
+.ccard { position: relative; overflow: hidden; text-align: left; cursor: pointer; padding: 22px 20px 18px; background: var(--bg-card); transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease); animation: rise .6s var(--ease) both; animation-delay: calc(var(--i, 0) * 60ms); }
+.ccard::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--cc); opacity: .8; }
+.ccard:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: var(--border-3); }
+.ccard:active { transform: translateY(-1px); }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.ccard-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ccode { font-size: 12px; font-weight: 600; color: var(--text-2); display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.ccode i { width: 8px; height: 8px; border-radius: 50%; background: var(--cc); display: inline-block; }
+.cname { font-size: 14px; font-weight: 500; color: var(--text-1); margin-top: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cbig { display: flex; align-items: baseline; gap: 3px; margin-top: 10px; }
+.cbig .num { font-family: var(--font-serif); font-size: 52px; font-weight: 500; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; color: var(--text-1); }
+.cbig .pct { font-family: var(--font-serif); font-size: 22px; color: var(--text-3); }
+.cbig + .small { margin-top: 4px; }
+.cgrade { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.cnext { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-1); font-size: 12px; color: var(--text-2); display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.cnext span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+/* 100 分去向条 */
+.sbar { display: flex; height: 8px; border-radius: var(--r-pill); overflow: hidden; background: var(--fill-3); animation: reveal 1.1s var(--ease) both; }
+.sbar.thin { height: 5px; margin-top: 14px; }
+.seg { height: 100%; transition: width .5s var(--ease); }
+.seg + .seg { box-shadow: inset 2px 0 0 var(--bg-card); }
+.seg.earned { background: var(--success); }
+.seg.lost { background: var(--danger); }
+.seg.pending { background: var(--primary-light-2); background-image: repeating-linear-gradient(-45deg, transparent 0 4px, var(--stripe) 4px 7px); background-size: 20px 20px; animation: stripes 1.2s linear infinite; }
+.seg.remain { background: transparent; }
+@keyframes stripes { to { background-position: 20px 0; } }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-2); }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+.legend .earned i { background: var(--success); } .legend .lost i { background: var(--danger); }
+.legend .pending i { background: var(--primary-light-2); } .legend .remain i { background: var(--fill-3); }
+
+/* ---------- 甘特图 ---------- */
+.gscroll { overflow-x: auto; margin: 0 -26px; padding: 0 26px 8px; scrollbar-width: thin; scrollbar-color: var(--fill-4) transparent; }
+.gantt { min-width: 900px; position: relative; isolation: isolate; font-size: 12px; }
+.g-row { display: flex; }
+.g-lab { width: 136px; flex: none; padding-right: 12px; }
+.g-tl { position: relative; flex: 1; min-width: 0; }
+.g-head .g-tl { height: 62px; border-bottom: 1px solid var(--border-2); }
+.g-month { position: absolute; top: 0; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text-2); padding-left: 7px; border-left: 1px solid var(--border-3); height: 16px; line-height: 16px; }
+.g-week { position: absolute; top: 20px; color: var(--text-3); font-size: 11px; line-height: 16px; transform: translateX(-50%); font-family: var(--font-num); font-variant-numeric: tabular-nums; padding: 0 5px; border-radius: var(--r-pill); }
+.g-week.now { color: var(--primary); background: var(--primary-light); font-weight: 600; }
+.g-course { border-bottom: 1px solid var(--border-1); transition: background-color .2s var(--ease); }
+.g-course:last-child { border-bottom: 0; }
+.g-course:hover { background: var(--fill-1); }
+.g-course .g-lab { padding-block: 10px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+.g-cname { font-weight: 600; font-size: 13px; color: var(--text-1); display: flex; align-items: center; gap: 7px; font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.g-cname i { width: 8px; height: 8px; border-radius: 50%; background: var(--cc); flex: none; }
+.g-lanes { display: flex; flex-direction: column; }
+.g-lane { position: relative; display: flex; }
+.g-lane-lab { position: absolute; left: -64px; width: 56px; text-align: right; color: var(--text-3); font-size: 11px; top: 50%; transform: translateY(-50%); }
+.g-lanes-wrap { position: relative; flex: 1; padding-block: 8px; }
+.g-bar { position: absolute; height: 22px; border-radius: 5px; padding: 0 8px 0 10px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; font-size: 12px; font-weight: 500; cursor: default; z-index: 1;
+  background: var(--cc-l); color: var(--cc-t); border: 1px solid color-mix(in srgb, var(--cc) 24%, transparent); box-shadow: inset 2px 0 0 var(--cc);
+  transform-origin: left center; animation: barIn .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 22ms);
+  transition: box-shadow .2s var(--ease), transform .2s var(--ease), background-color .2s var(--ease), color .2s var(--ease); }
+.g-bar span { overflow: hidden; text-overflow: ellipsis; }
+.g-bar.now { background: color-mix(in srgb, var(--cc) var(--now-mix), var(--bg-card)); color: color-mix(in srgb, var(--cc-t) var(--now-t-mix), var(--text-1)); border-color: color-mix(in srgb, var(--cc) 72%, var(--bg-card)); font-weight: 600; box-shadow: inset 3px 0 0 var(--cc), 0 1px 3px color-mix(in srgb, var(--cc) 22%, transparent); }
+.g-bar.past { background: var(--bg-card); color: var(--text-3); border-color: var(--border-2); box-shadow: inset 2px 0 0 color-mix(in srgb, var(--cc) 34%, var(--fill-3)); }
+.g-bar.guess { border-style: dashed; }
+.g-bar:hover { box-shadow: inset 2px 0 0 var(--cc), var(--shadow-2); z-index: 3; }
+.g-bar.now:hover { box-shadow: inset 3px 0 0 var(--cc), var(--shadow-2); }
+.g-bar.past:hover { color: var(--text-2); }
+.g-ms { position: absolute; z-index: 1; width: 14px; height: 14px; transform: translate(-50%, 0) rotate(45deg); border-radius: 3px; background: var(--cc); border: 2.5px solid var(--bg-card); box-shadow: 0 0 0 1px var(--cc); animation: msIn .55s var(--ease) both; animation-delay: calc(var(--i, 0) * 22ms + 200ms); cursor: default; }
+.g-ms.past { background: var(--fill-4); box-shadow: 0 0 0 1px var(--fill-4); }
+.g-ms.guess { background: var(--bg-card); box-shadow: 0 0 0 1px var(--cc); border: 2px dashed var(--cc); }
+.g-ms-lab { position: absolute; font-size: 11px; font-weight: 500; color: var(--text-2); white-space: nowrap; transform: translateY(1px); pointer-events: none; }
+@keyframes barIn { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
+@keyframes msIn { from { transform: translate(-50%, 0) rotate(45deg) scale(0); } to { transform: translate(-50%, 0) rotate(45deg) scale(1); } }
+.g-overlay { position: absolute; top: 0; bottom: 0; left: 136px; right: 0; pointer-events: none; }
+/* 周网格画在泳道底下（不再盖在色条文字上）：17 周 = 整条时间轴，每周一条细线 */
+.g-grid { position: absolute; top: 62px; bottom: 0; width: 1px; background: transparent; }
+.g-course .g-tl { background-image: repeating-linear-gradient(to right, transparent 0 calc(100% / 17 - 1px), var(--border-1) calc(100% / 17 - 1px) calc(100% / 17)); }
+.g-band { position: absolute; top: 62px; bottom: 0; background: repeating-linear-gradient(-45deg, var(--g-band) 0 6px, transparent 6px 12px); border-left: 1px solid var(--g-band); border-right: 1px solid var(--g-band); }
+.g-band.off { background: var(--g-band); border-color: transparent; }
+.g-band-lab { position: absolute; top: 2px; font-size: 11px; color: var(--text-3); white-space: nowrap; }
+.g-line { position: absolute; z-index: 2; top: 42px; bottom: 0; width: 2px; margin-left: -1px; overflow: visible; }
+.g-line.today { background: linear-gradient(to bottom, var(--accent) 0%, var(--accent) 70%, color-mix(in srgb, var(--accent) 20%, transparent) 100%); }
+.g-line.flight { width: 1.5px; margin-left: -0.75px; background: repeating-linear-gradient(to bottom, var(--flight-line) 0 5px, transparent 5px 9px); }
+.g-flag { position: absolute; top: 0; transform: translateX(-50%); font-size: 11px; padding: 0 8px; height: 18px; line-height: 18px; border-radius: var(--r-pill); color: var(--on-fill); white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+.g-line.today .g-flag { background: var(--primary-fill); }
+.g-line.flight .g-flag { background: var(--flag-ink); color: var(--flag-ink-t); }
+.g-line.today::after { --pulse: var(--accent); content: ""; position: absolute; top: 15px; left: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--primary-light); animation: pulse 2.4s var(--ease) infinite; }
+.g-legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-3); font-size: 12px; align-items: center; }
+.g-legend .lb { display: inline-block; width: 18px; height: 10px; border-radius: 3px; background: var(--fill-2); border: 1px solid var(--border-3); box-shadow: inset 2px 0 0 var(--text-4); vertical-align: -1px; margin-right: 6px; }
+.g-legend .lb.now { background: var(--legend-now); border-color: var(--text-3); box-shadow: inset 2px 0 0 var(--text-2); }
+.g-legend .lb.guess { border-style: dashed; }
+.g-legend .lb.off { background: var(--g-band); border-color: transparent; box-shadow: none; }
+.g-legend .ld { display: inline-block; width: 9px; height: 9px; transform: rotate(45deg); background: var(--text-2); margin-right: 8px; border-radius: 2px; }
+
+/* ---------- 待办 ---------- */
+.todo-group + .todo-group { margin-top: 22px; }
+.todo-gh { display: flex; align-items: baseline; gap: 8px; font-size: 12px; color: var(--text-3); margin-bottom: 4px; padding: 0 8px 8px; border-bottom: 1px solid var(--border-1); font-variant-numeric: tabular-nums; }
+.todo-gh b { font-family: var(--font-serif); color: var(--text-1); font-weight: 600; font-size: 17px; font-variant-numeric: lining-nums tabular-nums; letter-spacing: 0; }
+.todo { display: flex; align-items: flex-start; gap: 12px; padding: 11px 8px; border-radius: var(--r-m); transition: background-color .2s var(--ease); animation: rise .45s var(--ease) both; animation-delay: calc(var(--i, 0) * 30ms); }
+.todo:hover { background: var(--fill-1); }
+.todo-main { flex: 1; min-width: 0; }
+.todo-t { font-size: 14px; color: var(--text-1); transition: color .3s var(--ease); overflow-wrap: anywhere; }
+.todo-s { font-size: 12px; color: var(--text-3); display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; align-items: center; font-variant-numeric: tabular-nums; }
+.todo.done .todo-t { color: var(--text-3); text-decoration: line-through; text-decoration-color: var(--text-4); }
+.todo-r { display: flex; align-items: center; gap: 8px; flex: none; padding-top: 1px; }
+.chk { appearance: none; -webkit-appearance: none; flex: none; width: 18px; height: 18px; margin: 2px 0 0; border: 1.5px solid var(--border-3); border-radius: 5px; background: var(--bg-card); cursor: pointer; position: relative; transition: background-color .2s var(--ease), border-color .2s var(--ease), box-shadow .2s var(--ease); }
+.chk:hover { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+.chk:checked { background: var(--primary-fill); border-color: var(--primary-fill); }
+.chk::after { content: ""; position: absolute; left: 5px; top: 1.5px; width: 4px; height: 9px; border: solid var(--on-fill); border-width: 0 2px 2px 0; transform: rotate(45deg) scale(0); transition: transform .25s var(--ease); }
+.chk:checked::after { transform: rotate(45deg) scale(1); }
+.chk:disabled { cursor: not-allowed; }
+.chk:disabled:hover { box-shadow: none; }
+.chk:disabled:checked { background: var(--success); border-color: var(--success); }
+.chk:disabled:checked::after { border-color: var(--on-status); }
+.linkbtn { border: 0; background: none; color: var(--primary); cursor: pointer; padding: 4px 0; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+.linkbtn:hover { color: var(--primary-hover); }
+.linkbtn svg { transition: transform .3s var(--ease); }
+.linkbtn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.empty { text-align: center; padding: 28px 12px; color: var(--text-3); }
+
+/* ---------- 课程页 ---------- */
+.ctitle { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; margin-bottom: 24px; }
+.ctitle h2 { margin: 0; font-family: var(--font-serif); font-size: 40px; font-weight: 500; line-height: 1.1; letter-spacing: -0.015em; font-variant-numeric: lining-nums; color: var(--text-1); text-wrap: balance; display: flex; align-items: center; gap: 14px; }
+.ctitle h2 i { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--cc); box-shadow: 0 0 0 4px var(--cc-l); }
+.ctitle .sub { color: var(--text-3); font-size: 13px; margin-top: 8px; }
+.cgrid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 22px; align-items: start; }
+.hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 32px; align-items: center; }
+.ring { position: relative; width: 156px; height: 156px; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { stroke-width: 9px; }
+.ring .bgc { stroke: var(--fill-3); }
+.ring .fgc { stroke: var(--rc, var(--primary)); stroke-linecap: round; animation: ringIn 1.4s var(--ease) both; }
+@keyframes ringIn { from { stroke-dashoffset: 427.26; } }
+.ring-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-c .num { font-family: var(--font-serif); font-size: 44px; font-weight: 500; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; color: var(--text-1); }
+.ring-c .num small { font-size: 18px; color: var(--text-3); margin-left: 2px; letter-spacing: 0; }
+.ring-c .lab { font-size: 11.5px; color: var(--text-3); margin-top: 8px; }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.stat { background: var(--fill-1); border: 1px solid var(--border-1); border-radius: var(--r-m); padding: 13px 15px; }
+.stat-l { font-size: 12px; font-weight: 500; color: var(--text-2); display: flex; align-items: center; gap: 7px; }
+.stat-l i { width: 7px; height: 7px; border-radius: 50%; }
+.stat-v { font-family: var(--font-serif); font-size: 34px; font-weight: 500; line-height: 1.1; letter-spacing: -0.015em; margin-top: 4px; font-variant-numeric: lining-nums tabular-nums; color: var(--text-1); }
+.stat-v small { font-size: 12px; color: var(--text-3); font-weight: 400; letter-spacing: 0; font-family: var(--font); margin-left: 5px; }
+.hero-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; }
+
+.grow { display: grid; grid-template-columns: 168px minmax(0, 1fr) 96px; gap: 16px; align-items: center; padding: 13px 0; }
+.grow + .grow { border-top: 1px solid var(--border-1); }
+.grow-l { min-width: 0; }
+.grow-n { font-size: 13.5px; font-weight: 500; color: var(--text-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grow-w { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.grow-r { text-align: right; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.grow-r .num { font-family: var(--font-serif); font-size: 21px; color: var(--text-1); font-weight: 600; font-variant-numeric: lining-nums tabular-nums; }
+.gbar { height: 8px; border-radius: var(--r-pill); background: var(--fill-3); display: flex; overflow: hidden; animation: reveal 1.1s var(--ease) both; animation-delay: calc(var(--i, 0) * 80ms + 150ms); }
+.gbar.unknown { background: var(--fill-2); background-image: repeating-linear-gradient(-45deg, transparent 0 4px, var(--fill-3) 4px 8px); }
+
+.targets { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.tchip { border: 1px solid var(--border-2); border-radius: var(--r-m); padding: 12px 14px; background: var(--bg-card); transition: border-color .2s var(--ease), background-color .2s var(--ease); }
+.tchip:hover { border-color: var(--border-3); background: var(--fill-1); }
+.tchip-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; font-size: 11.5px; color: var(--text-3); gap: 0 6px; font-variant-numeric: tabular-nums; }
+.tchip-h b { color: var(--text-1); font-weight: 600; font-size: 13px; white-space: nowrap; }
+.tchip-h span { white-space: nowrap; }
+.tchip-v { font-family: var(--font-serif); font-size: 30px; font-weight: 500; letter-spacing: -0.01em; margin-top: 4px; line-height: 1.15; font-variant-numeric: lining-nums tabular-nums; }
+.tchip-v.ok { color: var(--success-t); } .tchip-v.mid { color: var(--primary); } .tchip-v.hard { color: var(--warning-t); } .tchip-v.no { color: var(--text-3); }
+.tchip-d { font-size: 12px; color: var(--text-3); text-wrap: pretty; }
+.sim { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border-1); }
+.sim-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--text-2); }
+.sim-out { display: flex; align-items: baseline; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.sim-out .num { font-family: var(--font-serif); font-size: 44px; font-weight: 500; line-height: 1.05; letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; color: var(--text-1); }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; border-radius: var(--r-pill); background: linear-gradient(to right, var(--accent) var(--p, 50%), var(--fill-3) var(--p, 50%)); margin: 16px 0 6px; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--accent); box-shadow: var(--shadow-1); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.12); box-shadow: 0 0 0 6px var(--primary-light); }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--accent); }
+.stepper { display: inline-flex; align-items: center; border: 1px solid var(--border-3); border-radius: var(--r-m); overflow: hidden; background: var(--bg-card); }
+.stepper button { width: 30px; height: 30px; border: 0; background: var(--fill-1); color: var(--text-2); cursor: pointer; font-size: 16px; line-height: 1; transition: background-color .2s var(--ease), color .2s var(--ease); }
+.stepper button:hover { background: var(--primary-light); color: var(--primary); }
+.stepper output { min-width: 42px; text-align: center; font-family: var(--font-num); font-weight: 500; font-size: 15px; font-variant-numeric: tabular-nums; }
+
+/* 明细表 */
+.tbl-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; min-width: 620px; font-size: 13px; }
+.tbl th { text-align: left; font-weight: 500; color: var(--text-3); background: transparent; padding: 8px 12px; font-size: 12px; letter-spacing: .04em; white-space: nowrap; border-bottom: 1px solid var(--border-2); }
+.tbl th:first-child { border-radius: 0; padding-left: 4px; } .tbl th:last-child { border-radius: 0; }
+.tbl td { padding: 11px 12px; border-bottom: 1px solid var(--border-1); vertical-align: top; }
+.tbl td:first-child { padding-left: 4px; }
+.tbl tbody tr { transition: background-color .2s var(--ease); }
+.tbl tbody tr:hover { background: var(--fill-1); }
+.tbl .r { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tbl .gh td { background: transparent; padding-top: 22px; border-bottom: 1px solid var(--border-2); }
+.tbl tbody tr.gh:hover { background: transparent; }
+.gh-btn { border: 0; background: none; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-1); font-size: 13.5px; width: 100%; text-align: left; font-variant-numeric: tabular-nums; }
+.gh-btn svg { transition: transform .3s var(--ease); color: var(--text-3); flex: none; }
+.gh-btn[aria-expanded="false"] svg { transform: rotate(-90deg); }
+.gh-note { font-weight: 400; color: var(--text-3); font-size: 12px; margin: 4px 0 0 22px; }
+.it-t { color: var(--text-1); }
+.it-t a { color: var(--text-1); text-decoration: underline; text-decoration-color: var(--border-3); text-decoration-thickness: 1px; text-underline-offset: 3px; transition: color .2s var(--ease), text-decoration-color .2s var(--ease); }
+.it-t a:hover { color: var(--primary); text-decoration-color: currentColor; }
+.it-n { color: var(--text-3); font-size: 12px; margin-top: 2px; }
+.score { font-family: var(--font-num); font-weight: 500; font-size: 14px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.score.full { color: var(--success-t); }
+.notes { margin: 0; padding-left: 18px; color: var(--text-2); font-size: 13px; display: grid; gap: 8px; }
+.notes li::marker { color: var(--primary-light-2); }
+.foot { text-align: center; color: var(--text-3); font-size: 12px; padding-top: 16px; }
+
+/* Tooltip */
+#tip { position: fixed; z-index: 50; max-width: 280px; padding: 9px 12px; border-radius: var(--r-m); background: var(--tip-bg); color: var(--tip-text); border: 1px solid var(--tip-line); font-size: 12px; line-height: 1.5; pointer-events: none; opacity: 0; transform: translateY(4px); transition: opacity .15s var(--ease), transform .15s var(--ease); box-shadow: var(--shadow-3); }
+#tip.show { opacity: 1; transform: none; }
+#tip b { font-weight: 600; display: block; margin-bottom: 2px; }
+#tip .d { opacity: .75; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 1180px) {
+  .ccards { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .cgrid { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 860px) {
+  .ov-hero { grid-template-columns: minmax(0,1fr); }
+  .ccards { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .hero { grid-template-columns: minmax(0,1fr); justify-items: center; gap: 20px; }
+  .hero > div:last-child { width: 100%; }
+  .grow { grid-template-columns: minmax(0,1fr) 84px; }
+  .grow .gbar { grid-column: 1 / -1; grid-row: 2; }
+  .tab .tcode { display: none; }
+  .sync .full { display: none; }
+  .ctitle h2 { font-size: 32px; }
+}
+@media (max-width: 520px) {
+  .ccards { grid-template-columns: minmax(0,1fr); }
+  .cd-unit.days .cd-num { font-size: 80px; } .cd-num { font-size: 42px; }
+  .cd { gap: 16px; margin-top: 14px; margin-bottom: 22px; }
+  .brand-title { font-size: 18px; }
+  .topbar-row { gap: 10px; }
+  .brand { gap: 10px; }
+  .logo { width: 30px; height: 30px; }
+  .top-actions { gap: 6px; }
+  .sync { padding: 0 10px; gap: 6px; }
+  .btn.btn-primary { padding: 0 12px; }
+  .brand-sub { display: none; }
+  .sync .abs { display: none; }
+  .card { padding: 18px; }
+  .card.flight { padding: 22px 20px 20px; min-height: 0; }
+  .flight-plane { width: 120px; height: 120px; right: 10px; top: 10px; }
+  .gscroll { margin: 0 -18px; padding: 0 18px 6px; }
+  .targets { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+  .tchip { padding: 12px 12px; }
+  .ctitle h2 { font-size: 27px; letter-spacing: -0.01em; gap: 12px; }
+  .kpi { padding: 14px 14px 13px; }
+  .kpi-v { font-size: 36px; }
+}
+@media (max-width: 380px) {
+  #refreshBtn > span { display: none; }
+  #refreshBtn { padding: 0 8px; width: 34px; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* === gantt zoom (shared) === 时间线缩放、拖动和固定左栏；换主题时整段保留 */
+.g-tools { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
+.g-zoom { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--border-2); border-radius: 999px; background: var(--bg-card); }
+.g-zoom .g-zb { height: 26px; min-width: 26px; padding: 0 9px; border: 0; border-radius: 999px; background: transparent; color: var(--text-2); font-size: 15px; line-height: 1; box-shadow: none; transform: none; }
+.g-zoom .g-zb:hover:not(:disabled) { background: var(--fill-2); color: var(--text-1); }
+.g-zoom .g-zb:disabled { opacity: .35; cursor: default; }
+.g-zoom .g-ztoday { font-size: 12px; font-weight: 500; color: var(--primary); }
+.g-zl { min-width: 56px; text-align: center; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.gscroll { cursor: grab; overscroll-behavior-x: contain; }
+.gscroll.dragging { cursor: grabbing; user-select: none; -webkit-user-select: none; }
+.gscroll.dragging .g-bar, .gscroll.dragging .g-ms { pointer-events: none; }
+.g-lab { position: sticky; left: 0; z-index: 6; background-color: var(--bg); background-image: linear-gradient(var(--bg-card), var(--bg-card)); }
+.g-lab::before { content: ""; position: absolute; top: 0; bottom: 0; right: 100%; width: 48px; background: inherit; pointer-events: none; }
+.g-course .g-lab { display: flex; flex-direction: row; align-items: stretch; gap: 6px; padding-block: 0; }
+.g-lab-c { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding-block: 10px; }
+.g-lab-l { flex: none; width: 34px; display: flex; flex-direction: column; }
+.g-lab-ln { display: flex; align-items: center; justify-content: flex-end; font-size: 11px; color: var(--text-3); white-space: nowrap; }
+.g-overlay { z-index: 3; }
+.g-week { white-space: nowrap; }
+.g-wd { display: none; }
+.gantt.zoomed .g-wd { display: inline; margin-left: 3px; opacity: .75; }
+@media (max-width: 520px) { .g-tools { justify-content: flex-start; } }
+.grow-sec { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border-2); font-size: 12px; color: var(--text-3); }
+/* 运维页（同样属于共享块：换主题时保留，只用颜色 token） */
+.ops-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.ops-kpis .kpi-v { font-size: 26px; line-height: 1.2; }
+.ops-alert { margin-bottom: 12px; padding: 10px 14px; border-radius: var(--r-m); background: var(--warning-light); color: var(--text-1); font-size: 13px; line-height: 1.6; }
+.runs { display: flex; flex-direction: column; }
+.run { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 12px; padding: 12px 0; }
+.run + .run { border-top: 1px solid var(--border-1); }
+.run-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; background: var(--fill-4); }
+.run-green .run-dot { background: var(--success); }
+.run-orange .run-dot { background: var(--warning); }
+.run-red .run-dot { background: var(--danger); }
+.run-main { min-width: 0; }
+.run-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.run-time { font-weight: 600; color: var(--text-1); font-variant-numeric: tabular-nums; }
+.run-trig { font-size: 12px; color: var(--text-3); }
+.run-sum { margin-top: 4px; color: var(--text-2); font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+.run-list { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--text-1); line-height: 1.7; overflow-wrap: anywhere; }
+.run-pend { margin-top: 6px; font-size: 12px; color: var(--text-2); line-height: 1.6; }
+.run-pend b { color: var(--warning); font-weight: 600; }
+.run-meta { margin-top: 6px; font-size: 12px; color: var(--text-3); }
+.flow { list-style: none; margin: 0; padding: 0; counter-reset: fs; display: flex; flex-direction: column; gap: 12px; }
+.flow-step { counter-increment: fs; display: grid; grid-template-columns: 24px minmax(0, 1fr); column-gap: 10px; row-gap: 2px; font-size: 13px; color: var(--text-2); line-height: 1.6; }
+.flow-step::before { content: counter(fs); grid-row: span 2; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; background: var(--fill-2); color: var(--text-1); }
+.flow-step b { color: var(--text-1); font-weight: 600; }
+.edges { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-2); line-height: 1.7; display: grid; gap: 4px; }
+.edges b { color: var(--text-1); font-weight: 600; }
+.cl { display: flex; flex-direction: column; }
+.cl-item { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; padding: 16px 0; }
+.cl-item + .cl-item { border-top: 1px solid var(--border-1); }
+.cl-date { font-weight: 600; color: var(--text-1); font-variant-numeric: tabular-nums; }
+.cl-ver { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.cl-body { min-width: 0; }
+.cl-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cl-title { font-weight: 600; color: var(--text-1); }
+.cl-why { margin-top: 6px; font-size: 13px; color: var(--text-2); line-height: 1.7; }
+.cl-points { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--text-1); line-height: 1.75; }
+@media (max-width: 860px) {
+  .ops-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cl-item { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .cl-side { display: flex; gap: 8px; align-items: baseline; }
+}
+/* === end gantt zoom === */
+</style>
+
+<header class="topbar">
+  <div class="wrap">
+    <div class="topbar-row">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M21 19H3"/></svg></div>
+        <div style="min-width:0">
+          <div class="brand-title">Fall 2026 成绩看板</div>
+          <div class="brand-sub">University of Florida · 交换学期 · 五门课</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="sync" id="sync"><span class="dot"></span><span id="syncText">Canvas 同步中</span></div>
+        <button class="btn btn-primary" id="refreshBtn" type="button" title="载入最新的 Canvas 数据（定时任务每天 7:30 / 19:30 更新）" aria-label="刷新">
+          <svg class="ri" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg>
+          <span>刷新</span>
+        </button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="课程"></nav>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+<div id="tip" role="tooltip"></div>
+
+<script src="config.js"></script>
+<script src="snapshot.js"></script>
+<script src="changelog.js"></script>
+<script>
+(function () {
+'use strict';
+const C = window.DASH_CONFIG;
+let S = window.CANVAS_SNAPSHOT || { fetchedAt: null, courses: {} };
+const TZ = C.tz;
+let NOW = new Date();
+let cdTimer = null;
+let remoteSeen = false, refreshing = false;
+let SIM = {}; // 目标计算滑块的位置（按课程）
+try { SIM = JSON.parse(localStorage.getItem('uf-dash-sim') || '{}') || {}; } catch (e) {}
+const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- 小工具 ---------- */
+function el(tag, props) {
+  const n = document.createElement(tag);
+  if (props) for (const k in props) {
+    const v = props[k];
+    if (v == null || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'style') n.style.cssText = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k === 'svg') n.innerHTML = v; // 仅用于页面自带的静态图标
+    else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (let i = 2; i < arguments.length; i++) add(n, arguments[i]);
+  return n;
+}
+function add(n, c) {
+  if (c == null || c === false) return;
+  if (Array.isArray(c)) { c.forEach(x => add(n, x)); return; }
+  n.append(c instanceof Node ? c : document.createTextNode(String(c)));
+}
+const sum = (a, f) => a.reduce((s, x) => s + (f ? f(x) : x), 0);
+const fx = (v, d = 1) => (v == null || isNaN(v)) ? '—' : Number(v).toFixed(d).replace(/\.0+$/, d ? '.0' : '');
+const f1 = v => (v == null || isNaN(v)) ? '—' : (Math.round(v * 10) / 10).toFixed(1);
+const ccVars = c => `--cc:var(--c-${c});--cc-l:var(--c-${c}-l);--cc-t:var(--c-${c}-t)`;
+const ICON_CHEV = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+const ICON_EXT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
+
+/* ---------- 时间（美东） ---------- */
+const fmtKey = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' });
+const fmtMD = new Intl.DateTimeFormat('en-US', { timeZone: TZ, month: 'numeric', day: 'numeric' });
+const fmtWD = new Intl.DateTimeFormat('zh-CN', { timeZone: TZ, weekday: 'short' });
+const fmtHM = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false });
+const etOffset = key => (key >= '2026-03-08' && key < '2026-11-01') ? '-04:00' : '-05:00';
+function parseDue(s) {
+  if (!s) return null;
+  if (/Z$|[+-]\d\d:\d\d$/.test(s)) return { date: new Date(s), allDay: false };
+  if (/^\d{4}-\d\d-\d\d$/.test(s)) return { date: new Date(s + 'T23:59:00' + etOffset(s)), allDay: true };
+  return { date: new Date(s + ':00' + etOffset(s.slice(0, 10))), allDay: false };
+}
+const keyOf = d => fmtKey.format(d);
+const dayNum = key => Date.UTC(+key.slice(0, 4), +key.slice(5, 7) - 1, +key.slice(8, 10)) / 864e5;
+let TODAY = keyOf(NOW);
+function fmtDue(d) {
+  if (!d) return '日期待定';
+  const md = fmtMD.format(d.date), wd = fmtWD.format(d.date);
+  return d.allDay ? `${md} ${wd}` : `${md} ${wd} ${fmtHM.format(d.date)}`;
+}
+function countdown(d) {
+  if (!d) return { text: '待定', tone: '' };
+  const days = dayNum(keyOf(d.date)) - dayNum(TODAY);
+  const ms = d.date - NOW;
+  if (ms < 0 && !(d.allDay && days === 0)) return { text: '已过', tone: '' };
+  if (!d.allDay && ms < 36e5) return { text: `还剩 ${Math.max(1, Math.round(ms / 6e4))} 分钟`, tone: 'red' };
+  if (!d.allDay && ms < 864e5) return { text: `还剩 ${Math.floor(ms / 36e5)} 小时`, tone: 'red' };
+  if (days === 0) return { text: '今天', tone: 'red' };
+  if (days === 1) return { text: '明天', tone: 'red' };
+  return { text: `${days} 天后`, tone: days <= 3 ? 'orange' : days <= 7 ? 'blue' : '' };
+}
+
+/* ---------- 成绩模型 ---------- */
+// 课程可以有自己的等级线（cc.scale），没写就用全局的 C.scale
+const letterOf = (v, cc) => { for (const [t, l] of ((cc && cc.scale) || C.scale)) if (v >= t) return l; return 'E'; };
+const glasgowOf = l => C.glasgow[l] || '—';
+const fromRow = r => ({ id: r[0], name: r[1], pts: r[2], due: r[3], score: r[4], state: r[5], sub: r[6], flags: r[7] ? r[7].split(',') : [] });
+function statusOf(a) {
+  if (a.flags.includes('excused')) return 'excused';
+  if (a.state === 'graded' && a.score != null) return 'graded';
+  if (a.state === 'submitted' || a.state === 'pending_review' || a.state === 'graded' || a.sub) return 'pending';
+  const d = parseDue(a.due);
+  if (!d) return 'ongoing';
+  if (d.date < NOW) return a.flags.includes('missing') ? 'missing' : 'overdue';
+  return 'todo';
+}
+function guessKind(name) {
+  if (/\bexam\b|mid-?term/i.test(name)) return '考试'; // 「Examination」这类词不算考试
+  if (/quiz|learning check/i.test(name)) return 'Quiz';
+  if (/project|milestone|proposal|implementation|turtle|video|paper|report/i.test(name)) return '项目';
+  if (/attendance/i.test(name)) return '出勤';
+  return '作业';
+}
+const STATUS = {
+  graded: ['已出分', 'green'], pending: ['已提交 · 待出分', 'blue'], todo: ['待完成', 'orange'],
+  overdue: ['已过期', 'red'], missing: ['缺交', 'red'], ongoing: ['进行中', ''], done: ['已完成', 'green'],
+  skip: ['不计', ''], excused: ['免交', ''], past: ['已过 · 待出分', 'blue']
+};
+
+function buildCourse(cc) {
+  const snap = S.courses[cc.code] || null;
+  const ov = cc.overrides || {};
+  const base = `https://ufl.instructure.com/courses/${cc.canvasId}`;
+  const all = snap ? snap.groups.flatMap(g => g.items.map(fromRow)) : [];
+  const mkCanvas = a => {
+    const o = ov[a.name] || {};
+    // Canvas 隐藏了分数（score 为空）时，用配置里手填的成绩；Canvas 一旦放出分数就以 Canvas 为准
+    const man = a.score == null && o.score != null;
+    // 手动标「已完成」（组员代交、外部问卷这类 Canvas 不会有提交记录的）；Canvas 一旦有了提交或成绩就以 Canvas 为准
+    const st = man ? 'graded' : statusOf(a);
+    return { key: 'c:' + a.id, source: 'canvas', title: o.title || a.name, rawName: a.name,
+      pts: man && o.pts != null ? o.pts : a.pts, score: man ? o.score : a.score, manualScore: man,
+      status: o.status === 'done' && (st === 'graded' || st === 'pending') ? st : (o.status || st), due: parseDue(a.due), note: o.note || '', late: a.flags.includes('late'),
+      link: `${base}/assignments/${a.id}`, kind: guessKind(a.name), course: cc };
+  };
+  const mkManual = (it, source) => {
+    const due = parseDue(it.due);
+    return { key: `m:${cc.code}:${it.title}`, source, title: it.title, pts: it.pts != null ? it.pts : null, score: null,
+      status: it.status || (due && due.date < NOW && keyOf(due.date) !== TODAY ? 'past' : 'todo'), due, note: it.note || '',
+      kind: it.kind || guessKind(it.title), course: cc, plan: !!it.plan, tentative: !!it.tentative };
+  };
+  const used = new Set(); // 已经归到某一项的 Canvas 条目
+  const groups = cc.groups.map(g => {
+    let items;
+    if (g.canvas) {
+      const sg = snap && snap.groups.find(x => x.name === g.canvas);
+      const rows = sg ? sg.items.map(fromRow) : [];
+      rows.forEach(a => used.add(a.id));
+      items = rows.filter(a => !a.flags.includes('omit')).map(mkCanvas);
+      for (const p of (g.placeholders || [])) {
+        if (!items.some(i => i.rawName && i.rawName.includes(p.match))) items.push(mkManual(p, 'placeholder'));
+      }
+      const tot = sum(items, i => i.pts || 0);
+      const counted = items.filter(i => (i.pts || 0) > 0).length;
+      for (const i of items) {
+        if (g.split === 'unknown' || !tot) { i.w = null; i.e = null; continue; }
+        if (g.split === 'equal') {
+          // 每项权重相同（例如三次考试各 15%），不按 Canvas 分值
+          i.w = (i.pts || 0) > 0 ? g.weight / counted : 0;
+          i.e = i.status === 'graded' && i.pts ? i.w * (i.score || 0) / i.pts : null;
+          continue;
+        }
+        i.w = g.weight * (i.pts || 0) / tot;
+        i.e = i.status === 'graded' ? g.weight * (i.score || 0) / tot : null;
+      }
+    } else {
+      items = g.items.map(it => {
+        const a = it.match ? all.find(x => !used.has(x.id) && new RegExp(it.match, 'i').test(x.name)) : null;
+        if (a) used.add(a.id);
+        const i = a ? mkCanvas(a) : mkManual(it, 'manual');
+        if (it.title) i.title = it.title;
+        if (it.note) i.note = it.note;
+        if (it.kind) i.kind = it.kind;
+        if (a && !a.due && it.due) i.due = parseDue(it.due);
+        if (a && it.fixDue) i.due = parseDue(it.fixDue); // Canvas 上日期填错时用大纲/课上说的日期
+        i.w = it.weight;
+        i.e = (i.status === 'graded' && i.pts) ? it.weight * i.score / i.pts : null;
+        return i;
+      });
+    }
+    const wOf = st => sum(items.filter(i => i.w != null && st.includes(i.status)), i => i.w);
+    const graded = wOf(['graded']);
+    const pending = wOf(['pending', 'past']);
+    return Object.assign({}, g, { items, graded, pending, earned: sum(items, i => i.e || 0),
+      remaining: Math.max(0, g.weight - graded - pending), unknown: g.split === 'unknown' });
+  });
+  const T = { w: sum(groups, g => g.weight), graded: sum(groups, g => g.graded), pending: sum(groups, g => g.pending), earned: sum(groups, g => g.earned) };
+  T.remaining = Math.max(0, T.w - T.graded - T.pending);
+  T.lost = Math.max(0, T.graded - T.earned);
+  const modelCur = T.graded > 0 ? T.earned / T.graded * 100 : null;
+  const canvasCur = snap ? snap.current : null;
+  // 按类别比例推算：每个已有成绩的类别先算得分率，再按类别权重加权（和期末的类别比例一致）
+  const gradedGroups = groups.filter(g => !g.unknown && g.graded > 0.001);
+  const catW = sum(gradedGroups, g => g.weight);
+  const catCur = catW > 0 ? sum(gradedGroups, g => g.weight * g.earned / g.graded) / catW * 100 : null;
+  const headline = cc.headline === 'canvas' && canvasCur != null ? canvasCur
+    : cc.headline === 'model' ? modelCur
+    : (catCur != null ? catCur : modelCur);
+  const bonus = (cc.bonus || []).map(b => {
+    if (b.canvasMatch) {
+      const a = all.find(x => x.name.includes(b.canvasMatch));
+      if (a) used.add(a.id);
+      return Object.assign({}, b, { earned: a && a.score != null && a.pts ? b.max * a.score / a.pts : 0, detail: a ? `${a.score}/${a.pts}` : '' });
+    }
+    return Object.assign({}, b);
+  });
+  // Canvas 上新出现、配置里还没对应到大纲权重的条目：照常显示成绩和截止时间，但不计入总评
+  const leftovers = all.filter(a => !used.has(a.id) && !a.flags.includes('omit'));
+  if (leftovers.length) groups.push({
+    label: '其他 Canvas 条目', weight: 0, extra: true, unknown: true, graded: 0, pending: 0, earned: 0, remaining: 0,
+    note: 'Canvas 上新出现、还没对应到大纲权重的条目：成绩和截止时间照常显示，但暂不计入总评，等确认它算哪一部分后再归类。',
+    items: leftovers.map(a => Object.assign(mkCanvas(a), { w: null, e: null }))
+  });
+  const extras = (cc.extras || []).map(e => mkManual(e, 'manual'));
+  const items = groups.flatMap(g => g.items.map(i => Object.assign(i, { group: g }))).concat(extras);
+  return { cc, snap, groups, T, modelCur, canvasCur, headline, bonus, extras, items };
+}
+
+/* ---------- 个人状态：勾选与出勤天数 ---------- */
+const Store = {
+  done: {}, copDays: null, ref: null, saving: false, dirty: false, listeners: [],
+  loadLocal() { try { const s = JSON.parse(localStorage.getItem('uf-dash-state') || '{}'); this.done = s.done || {}; this.copDays = s.copDays != null ? s.copDays : null; } catch (e) {} },
+  saveLocal() { try { localStorage.setItem('uf-dash-state', JSON.stringify({ done: this.done, copDays: this.copDays })); } catch (e) {} },
+  snapRef: null,
+  async connect() {
+    try {
+      if (!window.claude || !window.claude.use) return;
+      const db = await window.claude.use('db');
+      if (!db) return;
+      // 共享的最新快照：定时任务或桌面端刷新写入，所有设备打开时读取
+      try {
+        this.snapRef = db.doc('snapshots/latest');
+        this.subscribeSnap(0);
+        // 运行日志：定时任务每次运行写一条
+        db.collection('runs').orderBy('at', 'desc').limit(200).onSnapshot(qs => {
+          RUNS = qs.docs.map(d => d.data()).filter(r => r && typeof r.at === 'string');
+          renderOpsLive();
+        }, () => {});
+      } catch (e) { this.snapRef = null; }
+      const user = await window.claude.use('user');
+      if (!user) return;
+      const uid = await user.id();
+      if (!uid) return;
+      this.ref = db.doc(`data/users/${uid}/state`);
+      this.ref.onSnapshot(snap => {
+        if (!snap.exists) return;
+        const d = snap.data() || {};
+        this.done = Object.assign({}, d.done || {});
+        this.copDays = d.copDays != null ? d.copDays : this.copDays;
+        this.saveLocal();
+        this.listeners.forEach(f => f());
+      }, () => {});
+    } catch (e) {}
+  },
+  subscribeSnap(attempt) {
+    this.snapRef.onSnapshot(snap => {
+      const first = !remoteSeen;
+      remoteSeen = true;
+      if (!snap.exists) return;
+      let parsed = null;
+      try { parsed = JSON.parse((snap.data() || {}).json); } catch (e) { return; }
+      onRemoteSnapshot(parsed, first);
+    }, err => {
+      // 只有平台桥断开（unavailable）才值得重新订阅一次
+      if (err && err.code === 'unavailable' && attempt < 1) setTimeout(() => this.subscribeSnap(attempt + 1), 1500 + Math.random() * 2000);
+    });
+  },
+  async save() {
+    this.saveLocal();
+    if (!this.ref) return;
+    if (this.saving) { this.dirty = true; return; }
+    this.saving = true;
+    try { await this.ref.set({ done: this.done, copDays: this.copDays, updatedAt: new Date().toISOString() }); } catch (e) {}
+    this.saving = false;
+    if (this.dirty) { this.dirty = false; this.save(); }
+  },
+  toggle(key, v) { if (v) this.done[key] = true; else delete this.done[key]; this.save(); }
+};
+Store.loadLocal();
+
+let COURSES = C.courses.map(buildCourse);
+function attendanceDays(b) { return Store.copDays != null ? Store.copDays : b.days; }
+function bonusEarned(course) {
+  return sum(course.bonus, b => b.kind === 'attendance' ? b.max * Math.min(attendanceDays(b), b.need) / b.need : (b.earned || 0));
+}
+const OPEN = ['todo', 'overdue', 'missing'];
+const isOpen = i => OPEN.includes(i.status);
+const isActionable = i => !['skip', 'ongoing', 'excused'].includes(i.status);
+
+/* ---------- Tooltip ---------- */
+const tip = document.getElementById('tip');
+function showTip(e, title, lines) {
+  tip.replaceChildren(el('b', { text: title }), ...lines.map(l => el('div', { class: 'd', text: l })));
+  tip.classList.add('show');
+  moveTip(e);
+}
+function moveTip(e) {
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 12, y = e.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 12;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 12;
+  tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+}
+const hideTip = () => tip.classList.remove('show');
+function tipOn(node, title, lines) {
+  node.addEventListener('mouseenter', e => showTip(e, title, lines));
+  node.addEventListener('mousemove', moveTip);
+  node.addEventListener('mouseleave', hideTip);
+  node.addEventListener('focus', () => { const r = node.getBoundingClientRect(); showTip({ clientX: r.left, clientY: r.bottom }, title, lines); });
+  node.addEventListener('blur', hideTip);
+}
+
+/* ---------- 数字滚动 ---------- */
+function countUp(root) {
+  root.querySelectorAll('[data-count]').forEach(n => {
+    const target = parseFloat(n.dataset.count), dec = +(n.dataset.dec || 0);
+    if (isNaN(target)) return;
+    if (REDUCED) { n.textContent = target.toFixed(dec); return; }
+    const t0 = performance.now(), dur = 900;
+    const step = t => {
+      const p = Math.min(1, (t - t0) / dur), v = target * (1 - Math.pow(1 - p, 3));
+      n.textContent = v.toFixed(dec);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+const cnum = (v, dec = 1, cls = 'num') => el('span', { class: cls, 'data-count': v == null ? null : v, 'data-dec': dec, text: v == null ? '—' : Number(v).toFixed(dec) });
+
+/* ---------- 通用组件 ---------- */
+const tag = (text, tone, extra) => el('span', { class: 'tag' + (tone ? ' ' + tone : '') + (extra ? ' ' + extra : ''), text });
+// UF 字母成绩，以及按格拉斯哥大学换算表（USA System 2）折合的等级
+const gradeTag = (l, v) => { const t = tag(`UF ${l} · 格大 ${glasgowOf(l)}`, toneOf(v)); t.title = `UF 字母成绩 ${l}，按格拉斯哥大学换算表（USA System 2）折合 ${glasgowOf(l)}`; return t; };
+const toneOf = v => v == null ? '' : v >= 90 ? 'green' : v >= 80 ? 'blue' : v >= 70 ? 'orange' : 'red';
+function stackBar(parts, total, cls) {
+  const bar = el('div', { class: 'sbar' + (cls ? ' ' + cls : '') });
+  [['earned', parts.earned], ['lost', parts.lost], ['pending', parts.pending]].forEach(([k, v]) => {
+    if (v > 0.001) bar.append(el('div', { class: 'seg ' + k, style: `width:${v / total * 100}%` }));
+  });
+  return bar;
+}
+function legend() {
+  return el('div', { class: 'legend' },
+    el('span', { class: 'earned' }, el('i'), '已得分'), el('span', { class: 'lost' }, el('i'), '失分'),
+    el('span', { class: 'pending' }, el('i'), '等待出分'), el('span', { class: 'remain' }, el('i'), '尚未进行'));
+}
+function nextOpen(course) {
+  return course.items.filter(i => isOpen(i) && !Store.done[i.key] && i.due).sort((a, b) => a.due.date - b.due.date)[0] || null;
+}
+
+/* ---------- 待办行 ---------- */
+function todoRow(i, idx, opts) {
+  const auto = !isOpen(i) && i.status !== 'past';
+  const checked = auto || i.status === 'past' || !!Store.done[i.key];
+  const cd = countdown(i.due);
+  const cb = el('input', { type: 'checkbox', class: 'chk', id: 'chk-' + i.key.replace(/[^\w]/g, '_') + (opts && opts.scope ? '-' + opts.scope : ''), 'aria-label': '完成：' + i.title });
+  cb.checked = checked;
+  if (auto) { cb.disabled = true; cb.title = 'Canvas 已有提交或成绩'; }
+  const row = el('div', { class: 'todo' + (checked ? ' done' : ''), style: `--i:${idx};${ccVars(i.course.color)}` },
+    cb,
+    el('div', { class: 'todo-main' },
+      el('div', { class: 'todo-t' }, i.link ? el('a', { href: i.link, target: '_blank', rel: 'noopener', style: 'color:inherit', text: i.title }) : i.title),
+      el('div', { class: 'todo-s' },
+        opts && opts.showCourse ? el('span', { class: 'tag course', text: i.course.code }) : null,
+        el('span', { text: fmtDue(i.due) }),
+        i.kind ? el('span', { text: '· ' + i.kind }) : null,
+        i.w != null && i.w > 0 ? el('span', { text: `· 占总评 ${f1(i.w)}%` }) : null,
+        i.source === 'placeholder' ? el('span', { text: '· Canvas 未发布' }) : null,
+        i.tentative ? el('span', { text: '· 日期待确认' }) : null,
+        i.plan ? el('span', { text: '· 自己定的' }) : null)),
+    el('div', { class: 'todo-r' },
+      checked ? tag(auto ? (i.status === 'graded' ? '已出分' : '已提交') : (i.status === 'past' ? '已过' : '已完成'), 'green')
+        : tag(cd.text, cd.tone)));
+  if (i.note) tipOn(row.querySelector('.todo-t'), i.title, [i.note]);
+  cb.addEventListener('change', () => {
+    Store.toggle(i.key, cb.checked);
+    row.classList.toggle('done', cb.checked);
+    rerenderTodos();
+  });
+  return row;
+}
+
+/* ---------- 概览 ---------- */
+function renderOverview() {
+  const p = el('section', { class: 'panel', id: 'p-overview', role: 'tabpanel' });
+  const flightD = parseDue(C.flightHome + 'T00:00');
+  const startD = parseDue(C.semesterStart + 'T00:00');
+  const prog = Math.max(0, Math.min(1, (NOW - startD.date) / (flightD.date - startD.date)));
+  const classEndP = (parseDue(C.classesEnd + 'T23:59').date - startD.date) / (flightD.date - startD.date);
+  const finalsP = (parseDue(C.finals[0] + 'T00:00').date - startD.date) / (flightD.date - startD.date);
+
+  const cdBox = el('div', { class: 'cd', 'aria-live': 'off' });
+  const units = [['days', '天'], ['h', '时'], ['m', '分'], ['s', '秒']].map(([k, l]) => {
+    const n = el('div', { class: 'cd-num', text: '--' });
+    cdBox.append(el('div', { class: 'cd-unit ' + k }, n, el('div', { class: 'cd-lab', text: l })));
+    return n;
+  });
+  const tick = () => {
+    let ms = Math.max(0, flightD.date - Date.now());
+    const d = Math.floor(ms / 864e5); ms -= d * 864e5;
+    const h = Math.floor(ms / 36e5); ms -= h * 36e5;
+    const m = Math.floor(ms / 6e4); ms -= m * 6e4;
+    const s = Math.floor(ms / 1e3);
+    units[0].textContent = d; units[1].textContent = String(h).padStart(2, '0');
+    units[2].textContent = String(m).padStart(2, '0'); units[3].textContent = String(s).padStart(2, '0');
+  };
+  tick(); clearInterval(cdTimer); cdTimer = setInterval(tick, 1000);
+
+  const open = COURSES.flatMap(c => c.items).filter(i => isOpen(i) && isActionable(i) && (!i.due || i.due.date <= parseDue(C.flightHome).date));
+  const openLeft = open.filter(i => !Store.done[i.key]);
+  const exams = openLeft.filter(i => i.kind === '考试' && i.due);
+  const nextExam = exams.sort((a, b) => a.due.date - b.due.date)[0];
+  const week = openLeft.filter(i => i.due && dayNum(keyOf(i.due.date)) - dayNum(TODAY) <= 7);
+  const avg = sum(COURSES.filter(c => c.headline != null), c => c.headline) / COURSES.filter(c => c.headline != null).length;
+
+  const flight = el('div', { class: 'card flight' },
+    el('div', { class: 'flight-plane', svg: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>' }),
+    el('div', { class: 'card-t' }, '离回国还有'),
+    el('div', { class: 'card-sub', text: '12 月 12 日（周六）启程' }),
+    cdBox,
+    el('div', { class: 'track' },
+      el('div', { class: 'track-fill', style: `width:${prog * 100}%` }),
+      el('div', { class: 'track-mark', style: `left:${classEndP * 100}%`, title: '12/2 最后一节课' }),
+      el('div', { class: 'track-mark', style: `left:${finalsP * 100}%`, title: '12/5 起期末考试周' })),
+    el('div', { class: 'track-meta' },
+      el('span', { text: `8/20 开学` }),
+      el('span', { text: `学期已过 ${Math.round(prog * 100)}%` }),
+      el('span', { text: '12/2 最后一节课 · 12/5 起期末考试周 · 12/12 回国' })));
+
+  const kpis = el('div', { class: 'card' },
+    el('div', { class: 'card-h' }, el('div', { class: 'card-t' }, '学期概况')),
+    el('div', { class: 'ov-kpis' },
+      el('div', { class: 'kpi' }, el('div', { class: 'kpi-l', text: '五门课平均成绩' }),
+        el('div', { class: 'kpi-v' }, cnum(avg, 1, ''), el('small', { text: '%' })),
+        el('div', { class: 'kpi-d', text: '只算已经出分的部分' })),
+      el('div', { class: 'kpi' }, el('div', { class: 'kpi-l', text: '待完成任务' }),
+        el('div', { class: 'kpi-v' }, cnum(openLeft.length, 0, ''), el('small', { text: '项' })),
+        el('div', { class: 'kpi-d', text: `未来 7 天内 ${week.length} 项` })),
+      el('div', { class: 'kpi' }, el('div', { class: 'kpi-l', text: '剩余考试' }),
+        el('div', { class: 'kpi-v' }, cnum(exams.length, 0, ''), el('small', { text: '场' })),
+        el('div', { class: 'kpi-d', text: nextExam ? `下一场：${nextExam.course.short} ${fmtDue(nextExam.due)}` : '—' })),
+      el('div', { class: 'kpi' }, el('div', { class: 'kpi-l', text: '等待出分' }),
+        el('div', { class: 'kpi-v' }, cnum(COURSES.flatMap(c => c.items).filter(i => i.status === 'pending').length, 0, ''), el('small', { text: '项' })),
+        el('div', { class: 'kpi-d', text: '已提交，还没出成绩' }))));
+
+  const cards = el('div', { class: 'ccards' }, COURSES.map((c, idx) => {
+    const v = c.headline, l = v != null ? letterOf(v, c.cc) : null, nx = nextOpen(c), cd = nx ? countdown(nx.due) : null;
+    const card = el('button', { class: 'card ccard', style: `--i:${idx};${ccVars(c.cc.color)}`, type: 'button', onclick: () => go(c.cc.code) },
+      el('div', { class: 'ccard-top' },
+        el('div', { class: 'ccode' }, el('i'), c.cc.code),
+        l ? gradeTag(l, v) : null),
+      el('div', { class: 'cname', text: c.cc.name }),
+      el('div', { class: 'cbig' }, cnum(v, 1), el('span', { class: 'pct', text: '%' })),
+      el('div', { class: 'small muted', text: `已评 ${f1(c.T.graded)} 分中拿到 ${f1(c.T.earned)} 分` + (bonusEarned(c) > 0.05 ? ` · 另有加分 +${f1(bonusEarned(c))}` : '') }),
+      stackBar(c.T, 100, 'thin'),
+      el('div', { class: 'cnext' },
+        el('span', { text: nx ? '下一项：' + nx.title : '近期没有任务' }),
+        cd ? tag(cd.text, cd.tone) : null));
+    return card;
+  }));
+
+  const ganttCard = el('div', { class: 'card' },
+    el('div', { class: 'card-h' },
+      el('div', null, el('div', { class: 'card-t' }, '学期时间线'), el('div', { class: 'card-sub', text: '按各课大纲整理的教学单元、项目和考试；实线是今天，虚线是回国日。放大后可以按住拖动，⌘ + 滚轮或双指捏合也能缩放' })),
+      el('div', { class: 'g-tools' },
+        el('div', { class: 'g-legend' },
+          el('span', null, el('span', { class: 'lb now' }), '进行中'), el('span', null, el('span', { class: 'lb' }), '未开始'),
+          el('span', null, el('span', { class: 'lb guess' }), '开始日期为估计'), el('span', null, el('span', { class: 'ld' }), '考试'),
+          el('span', null, el('span', { class: 'lb off' }), '停课')),
+        el('div', { class: 'g-zoom', role: 'group', 'aria-label': '时间线缩放' },
+          el('button', { class: 'btn g-zb', type: 'button', 'data-z': 'out', 'aria-label': '缩小', title: '缩小', text: '−', onclick: () => stepZoom(-1) }),
+          el('span', { class: 'g-zl', 'aria-live': 'polite', text: zoomLabel(gZoom) }),
+          el('button', { class: 'btn g-zb', type: 'button', 'data-z': 'in', 'aria-label': '放大', title: '放大', text: '+', onclick: () => stepZoom(1) }),
+          el('button', { class: 'btn g-zb g-ztoday', type: 'button', title: '滚到本周', text: '今天', onclick: () => ganttToday(true) })))),
+    wireGantt(el('div', { class: 'gscroll' }, renderGantt())));
+
+  const todoCard = el('div', { class: 'card', id: 'ov-todo' });
+  p.append(el('div', { class: 'stack' },
+    el('div', { class: 'ov-hero' }, flight, kpis),
+    cards, ganttCard, todoCard));
+  renderOverviewTodos(todoCard);
+  return p;
+}
+
+function renderOverviewTodos(card) {
+  card.replaceChildren();
+  const limit = parseDue(C.flightHome).date;
+  const items = COURSES.flatMap(c => c.items).filter(i => isOpen(i) && isActionable(i) && (!i.due || i.due.date <= limit));
+  const doneN = items.filter(i => Store.done[i.key]).length;
+  card.append(el('div', { class: 'card-h' },
+    el('div', null, el('div', { class: 'card-t' }, '回国前的全部任务'), el('div', { class: 'card-sub', text: '在 Canvas 上提交过的会自动勾掉；手动勾选会保存到你的账号' })),
+    tag(`已完成 ${doneN} / ${items.length}`, 'blue')));
+  // 按周分组（周一为一周开始）
+  const monday = key => { const n = dayNum(key); const dow = (new Date(n * 864e5).getUTCDay() + 6) % 7; return n - dow; };
+  const thisW = monday(TODAY);
+  const buckets = new Map();
+  const put = (k, label, i) => { if (!buckets.has(k)) buckets.set(k, { label, items: [] }); buckets.get(k).items.push(i); };
+  items.sort((a, b) => (a.due ? a.due.date : Infinity) - (b.due ? b.due.date : Infinity)).forEach(i => {
+    if (!i.due) return put(1e9, '日期待定', i);
+    const k = keyOf(i.due.date), w = monday(k);
+    if (i.status !== 'todo' && i.due.date < NOW) return put(-1, '已过期未交', i);
+    const label = w === thisW ? '本周' : w === thisW + 7 ? '下周' : (() => { const d = new Date(w * 864e5); const e = new Date((w + 6) * 864e5); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} – ${e.getUTCMonth() + 1}/${e.getUTCDate()}`; })();
+    put(w, label, i);
+  });
+  if (!items.length) { card.append(el('div', { class: 'empty', text: '回国前的任务都完成了' })); return; }
+  let idx = 0;
+  [...buckets.entries()].sort((a, b) => a[0] - b[0]).forEach(([, b]) => {
+    card.append(el('div', { class: 'todo-group' },
+      el('div', { class: 'todo-gh' }, el('b', { text: b.label }), el('span', { text: `${b.items.length} 项` })),
+      b.items.map(i => todoRow(i, idx++, { showCourse: true, scope: 'ov' }))));
+  });
+}
+
+/* ---------- 时间线缩放与拖动 ---------- */
+const G_LAB = 136, G_DAY0 = '2026-08-17', G_DAYS = 119, G_MAX = 6;
+const G_STEPS = [1, 1.5, 2, 3, 4, 6];
+let gZoom = 1;
+try { gZoom = Math.min(G_MAX, Math.max(1, +localStorage.getItem('uf-gantt-zoom') || 1)); } catch (e) {}
+const zoomLabel = z => z <= 1.01 ? '整学期' : `约 ${Math.max(2, Math.round(17 / z))} 周`;
+function gEls() {
+  const sc = document.querySelector('#p-overview .gscroll');
+  const g = sc && sc.querySelector('.gantt');
+  return g && sc.clientWidth ? { sc, g, pad: parseFloat(getComputedStyle(sc).paddingLeft) || 0 } : null;
+}
+function gBaseTrack(sc) {
+  const cs = getComputedStyle(sc);
+  return Math.max(900, sc.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) - G_LAB;
+}
+function updateZoomUi() {
+  document.querySelectorAll('.g-zl').forEach(n => { n.textContent = zoomLabel(gZoom); });
+  document.querySelectorAll('.g-zoom [data-z="out"]').forEach(b => { b.disabled = gZoom <= 1.01; });
+  document.querySelectorAll('.g-zoom [data-z="in"]').forEach(b => { b.disabled = gZoom >= G_MAX - 0.01; });
+}
+const todayFrac = () => (dayNum(TODAY) - dayNum(G_DAY0) + 0.5) / G_DAYS;
+// 以 anchorX（屏幕坐标）下的日期为中心缩放；不给就以今天（在视野里时）或视野中间为中心
+function setGanttZoom(z, anchorX) {
+  const e = gEls(); if (!e) return;
+  const { sc, g, pad } = e;
+  z = Math.min(G_MAX, Math.max(1, z));
+  const rect = sc.getBoundingClientRect(), oldTrack = g.offsetWidth - G_LAB;
+  let ax = anchorX != null ? anchorX - rect.left : null;
+  if (ax == null) {
+    const tx = pad + G_LAB + todayFrac() * oldTrack - sc.scrollLeft;
+    ax = (tx > G_LAB && tx < sc.clientWidth) ? tx : (G_LAB + sc.clientWidth) / 2;
+  }
+  const frac = Math.min(1, Math.max(0, (sc.scrollLeft + ax - pad - G_LAB) / oldTrack));
+  const track = gBaseTrack(sc) * z;
+  g.style.width = (G_LAB + track) + 'px';
+  g.classList.toggle('zoomed', z >= 2);
+  sc.scrollLeft = pad + G_LAB + frac * track - ax;
+  gZoom = z;
+  try { localStorage.setItem('uf-gantt-zoom', String(Math.round(z * 100) / 100)); } catch (er) {}
+  updateZoomUi();
+}
+function stepZoom(dir) {
+  const next = dir > 0 ? (G_STEPS.find(s => s > gZoom + 0.01) || G_MAX) : ([...G_STEPS].reverse().find(s => s < gZoom - 0.01) || 1);
+  setGanttZoom(next);
+}
+function ganttToday(smooth) {
+  const e = gEls(); if (!e) return;
+  const { sc, g, pad } = e;
+  const left = pad + G_LAB + todayFrac() * (g.offsetWidth - G_LAB) - G_LAB - (sc.clientWidth - G_LAB) * 0.35;
+  sc.scrollTo({ left: Math.max(0, left), behavior: smooth && !REDUCED ? 'smooth' : 'auto' });
+}
+// 新渲染出来的时间线套用当前缩放；restoreLeft 用于后台刷新时保持滚动位置
+function fitGantt(restoreLeft) {
+  const e = gEls(); if (!e) return;
+  e.g.style.width = (G_LAB + gBaseTrack(e.sc) * gZoom) + 'px';
+  e.g.classList.toggle('zoomed', gZoom >= 2);
+  e.g.dataset.fitted = '1';
+  if (restoreLeft != null) e.sc.scrollLeft = restoreLeft;
+  else if (gZoom > 1.01) ganttToday(false);
+  updateZoomUi();
+}
+function wireGantt(sc) {
+  sc.addEventListener('wheel', e => {
+    if (!(e.ctrlKey || e.metaKey)) return; // 普通滚轮照常滚页面
+    e.preventDefault();
+    setGanttZoom(gZoom * Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0035)), e.clientX);
+  }, { passive: false });
+  let gs = 1; // Safari 的双指捏合
+  sc.addEventListener('gesturestart', e => { e.preventDefault(); gs = gZoom; });
+  sc.addEventListener('gesturechange', e => { e.preventDefault(); setGanttZoom(gs * e.scale, e.clientX); });
+  let drag = null;
+  sc.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    drag = { x: e.clientX, s: sc.scrollLeft, id: e.pointerId, moved: false };
+  });
+  sc.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x;
+    if (!drag.moved && Math.abs(dx) > 4) {
+      drag.moved = true; sc.classList.add('dragging'); hideTip();
+      try { sc.setPointerCapture(drag.id); } catch (er) {}
+    }
+    if (drag.moved) sc.scrollLeft = drag.s - dx;
+  });
+  const end = () => { if (drag && drag.moved) sc.classList.remove('dragging'); drag = null; };
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => sc.addEventListener(t, end));
+  return sc;
+}
+addEventListener('resize', () => { if (gEls()) setGanttZoom(gZoom); });
+
+/* ---------- 甘特图 ---------- */
+function renderGantt() {
+  const R0 = '2026-08-17', R1 = '2026-12-13';
+  const d0 = dayNum(R0), span = dayNum(R1) + 1 - d0;
+  const X = key => (dayNum(key) - d0) / span * 100;
+  const gantt = el('div', { class: 'gantt' });
+  // 刻度
+  const scale = el('div', { class: 'g-tl' });
+  [['2026-08-17', 'Aug'], ['2026-09-01', 'Sep'], ['2026-10-01', 'Oct'], ['2026-11-01', 'Nov'], ['2026-12-01', 'Dec']].forEach(([k, l]) =>
+    scale.append(el('div', { class: 'g-month', style: `left:${X(k)}%`, text: l })));
+  const curWeek = Math.floor((dayNum(TODAY) - d0) / 7);
+  for (let w = 0; w < 17; w++) {
+    const ws = new Date((d0 + w * 7) * 864e5);
+    scale.append(el('div', { class: 'g-week' + (w === curWeek ? ' now' : ''), style: `left:${(w * 7 + 3.5) / span * 100}%` },
+      'W' + (w + 1), el('span', { class: 'g-wd', text: `${ws.getUTCMonth() + 1}/${ws.getUTCDate()}` })));
+  }
+  gantt.append(el('div', { class: 'g-row g-head' }, el('div', { class: 'g-lab' }), scale));
+
+  // 每门课一组泳道
+  const LANES = ['单元', '项目', '考试'];
+  let bi = 0;
+  COURSES.forEach(c => {
+    const list = (C.gantt && C.gantt[c.cc.code]) || [];
+    const lanesWrap = el('div', { class: 'g-lanes-wrap', style: 'padding-block:6px' });
+    const laneLabs = el('div', { class: 'g-lab-l', style: 'padding-block:6px' });
+    const labCol = el('div', { class: 'g-lab' },
+      el('div', { class: 'g-lab-c' }, el('div', { class: 'g-cname' }, el('i'), c.cc.code), el('div', { class: 'small muted', text: c.cc.zh })), laneLabs);
+    LANES.forEach(lane => {
+      const its = list.filter(x => x.lane === lane).sort((a, b) => a.start < b.start ? -1 : 1);
+      if (!its.length) return;
+      // 同泳道重叠时分行
+      const rows = [];
+      its.forEach(it => {
+        const s = dayNum(it.start), e = dayNum(it.end || it.start);
+        const pad = lane === '考试' ? 6 : 0;
+        let r = rows.findIndex(end => end < s - pad);
+        if (r < 0) { rows.push(e); r = rows.length - 1; } else rows[r] = e;
+        it._row = r;
+      });
+      const rowH = 26, h = rows.length * rowH;
+      const laneEl = el('div', { class: 'g-lane', style: `height:${h}px` });
+      laneLabs.append(el('div', { class: 'g-lab-ln', style: `height:${h}px`, text: lane }));
+      its.forEach(it => {
+        const s = it.start, e = it.end || it.start;
+        const past = dayNum(e) < dayNum(TODAY), now = dayNum(s) <= dayNum(TODAY) && dayNum(TODAY) <= dayNum(e);
+        const top = it._row * rowH + 2;
+        const lines = [`${s.slice(5).replace('-', '/')}${e !== s ? ' – ' + e.slice(5).replace('-', '/') : ''}`];
+        if (it.source) lines.push('来源：' + it.source);
+        if (it.start_guess) lines.push('开始日期为估计');
+        if (lane === '考试' || s === e) {
+          const ms = el('div', { class: 'g-ms' + (past ? ' past' : '') + (it.start_guess ? ' guess' : ''), style: `left:${X(s) + 0.5 / span * 100}%;top:${top + 4}px;--i:${bi++}`, tabindex: '0', 'aria-label': `${c.cc.code} ${it.label} ${lines[0]}` });
+          tipOn(ms, `${c.cc.code} · ${it.label}`, lines);
+          laneEl.append(ms, el('div', { class: 'g-ms-lab', style: `left:calc(${X(s) + 0.5 / span * 100}% + 11px);top:${top + 3}px`, text: it.label }));
+        } else {
+          const bar = el('div', { class: 'g-bar' + (now ? ' now' : past ? ' past' : '') + (it.start_guess ? ' guess' : ''), tabindex: '0',
+            style: `left:${X(s)}%;width:${(dayNum(e) + 1 - dayNum(s)) / span * 100}%;top:${top}px;--i:${bi++}`, 'aria-label': `${c.cc.code} ${it.label} ${lines[0]}` },
+            el('span', { text: it.label }));
+          tipOn(bar, `${c.cc.code} · ${it.label}`, lines);
+          laneEl.append(bar);
+        }
+      });
+      lanesWrap.append(laneEl);
+    });
+    if (!lanesWrap.children.length) lanesWrap.append(el('div', { class: 'small muted', style: 'padding:6px 0', text: '大纲时间线整理中' }));
+    gantt.append(el('div', { class: 'g-row g-course', style: ccVars(c.cc.color) }, labCol, el('div', { class: 'g-tl g-lanes' }, lanesWrap)));
+  });
+
+  // 覆盖层：网格、停课日、期末周、今天、回国
+  const ov = el('div', { class: 'g-overlay' });
+  for (let w = 1; w < 17; w++) ov.append(el('div', { class: 'g-grid', style: `left:${w * 7 / span * 100}%` }));
+  for (const h of (C.noClass || [])) ov.append(el('div', { class: 'g-band off', title: `${h.label}：不上课`, style: `left:${X(h.start)}%;width:${(dayNum(h.end) + 1 - dayNum(h.start)) / span * 100}%` }));
+  const fb = el('div', { class: 'g-band', style: `left:${X(C.finals[0])}%;width:${(dayNum(C.finals[1]) + 1 - dayNum(C.finals[0])) / span * 100}%` });
+  ov.append(fb);
+  ov.append(el('div', { class: 'g-line today', style: `left:${(dayNum(TODAY) - d0 + 0.5) / span * 100}%` }, el('span', { class: 'g-flag', text: '今天' })));
+  ov.append(el('div', { class: 'g-line flight', style: `left:${(dayNum(C.flightHome) - d0 + 0.5) / span * 100}%` }, el('span', { class: 'g-flag', text: '✈ 12/12 回国' })));
+  gantt.append(ov);
+  return gantt;
+}
+
+/* ---------- 课程页 ---------- */
+function renderCourse(c) {
+  const cc = c.cc;
+  const p = el('section', { class: 'panel', id: 'p-' + cc.code, role: 'tabpanel', style: ccVars(cc.color) });
+  const v = c.headline, l = v != null ? letterOf(v, cc) : null;
+  const R = 68, CIRC = 2 * Math.PI * R;
+  const ringColor = v == null ? 'var(--fill-4)' : v >= 90 ? 'var(--success)' : v >= 80 ? 'var(--primary)' : v >= 70 ? 'var(--warning)' : 'var(--danger)';
+  const ring = el('div', { class: 'ring', style: `--rc:${ringColor}` });
+  ring.innerHTML = `<svg viewBox="0 0 160 160"><circle class="bgc" cx="80" cy="80" r="${R}" fill="none" stroke-width="12"/><circle class="fgc" cx="80" cy="80" r="${R}" fill="none" stroke-width="12" stroke-dasharray="${CIRC.toFixed(2)}" stroke-dashoffset="${(CIRC * (1 - Math.min(100, v || 0) / 100)).toFixed(2)}"/></svg>`;
+  ring.append(el('div', { class: 'ring-c' }, el('div', { class: 'num' }, cnum(v, 1, ''), el('small', { text: '%' })), el('div', { class: 'lab', text: cc.headline === 'canvas' ? '当前成绩（Canvas）' : cc.headline === 'model' ? '已评部分得分率' : '按类别比例推算' })));
+
+  const bonusE = bonusEarned(c);
+  const heroTags = el('div', { class: 'hero-tags' },
+    l ? gradeTag(l, v) : null,
+    v != null && c.modelCur != null && Math.abs(c.modelCur - v) > 0.5 ? tag(`已评部分得分率 ${f1(c.modelCur)}%`) : null,
+    v != null && c.canvasCur != null && Math.abs(c.canvasCur - v) > 0.5 ? tag(`Canvas 显示 ${fx(c.canvasCur, 1)}%`) : null,
+    bonusE > 0 ? tag(`另有加分 +${f1(bonusE)} 分`, 'green') : null);
+
+  const stat = (label, color, val, unit) => el('div', { class: 'stat' },
+    el('div', { class: 'stat-l' }, el('i', { style: `background:${color}` }), label),
+    el('div', { class: 'stat-v' }, cnum(val, 1, ''), el('small', { text: unit })));
+  const hero = el('div', { class: 'card' },
+    el('div', { class: 'hero' }, ring,
+      el('div', null,
+        el('div', { class: 'stats' },
+          stat('已得分', 'var(--success)', c.T.earned, '/ 100'),
+          stat('已评分', 'var(--text-3)', c.T.graded, `失分 ${f1(c.T.lost)}`),
+          stat('等待出分', 'var(--primary)', c.T.pending, '分'),
+          stat('尚未进行', 'var(--fill-4)', c.T.remaining, '分')),
+        heroTags)));
+
+  // 100 分去向
+  const bonusBox = el('div', { id: 'bn-' + cc.code });
+  renderBonusRows(c, bonusBox);
+  const flow = el('div', { class: 'card' },
+    el('div', { class: 'card-h' }, el('div', null, el('div', { class: 'card-t' }, '总评 100 分的构成'), el('div', { class: 'card-sub', text: '每行是一个评分类别，条的长度代表它占总评的比例' })), legend()),
+    c.groups.filter(g => !g.extra).map((g, gi) => {
+      const bar = el('div', { class: 'gbar' + (g.unknown ? ' unknown' : ''), style: `--i:${gi}` });
+      if (!g.unknown) [['earned', g.earned], ['lost', Math.max(0, g.graded - g.earned)], ['pending', g.pending]].forEach(([k, val]) => {
+        if (val > 0.001) bar.append(el('div', { class: 'seg ' + k, style: `width:${val / g.weight * 100}%` }));
+      });
+      const row = el('div', { class: 'grow' },
+        el('div', { class: 'grow-l' }, el('div', { class: 'grow-n', text: g.label }), el('div', { class: 'grow-w', text: `占 ${g.weight}%` + (g.unknown ? ' · 内部比例未公布' : '') })),
+        bar,
+        el('div', { class: 'grow-r' }, el('span', { class: 'num', text: g.unknown ? '—' : f1(g.earned) }), el('span', { text: ` / ${g.unknown ? '—' : f1(g.graded)}` }), el('div', { class: 'muted', text: '已得 / 已评' })));
+      if (g.note) tipOn(row.querySelector('.grow-n'), g.label, [g.note]);
+      return row;
+    }), bonusBox);
+
+  // 明细表
+  const tbody = el('tbody');
+  c.groups.forEach((g, gi) => {
+    const gid = `g-${cc.code}-${gi}`;
+    const btn = el('button', { class: 'gh-btn', type: 'button', 'aria-expanded': 'true', 'aria-controls': gid, svg: ICON_CHEV });
+    btn.append(el('span', { text: g.label }), (g.extra ? tag('未计入总评', 'orange') : tag(`${g.weight}%`, 'blue')), el('span', { class: 'muted small', style: 'font-weight:400;margin-left:auto', text: g.unknown ? '' : `已得 ${f1(g.earned)} / 已评 ${f1(g.graded)}` }));
+    const head = el('tr', { class: 'gh' }, el('td', { colspan: '5' }, btn, g.note ? el('div', { class: 'gh-note', text: g.note }) : null));
+    tbody.append(head);
+    const rows = g.items.slice().sort((a, b) => (a.due ? a.due.date : Infinity) - (b.due ? b.due.date : Infinity)).map(i => {
+      const st = STATUS[i.status] || ['—', ''];
+      const scoreCell = i.status === 'graded'
+        ? el('span', { class: 'score' + (i.pts && i.score >= i.pts ? ' full' : '') }, `${fx(i.score, i.score % 1 ? 1 : 0)}`, el('span', { class: 'muted', style: 'font-weight:500', text: ` / ${i.pts}` }))
+        : i.score != null ? el('span', { class: 'muted', text: `${fx(i.score, i.score % 1 ? 2 : 0)} / ${i.pts} · 部分出分` })
+        : el('span', { class: 'muted', text: i.pts != null ? `— / ${i.pts}` : '—' });
+      return el('tr', { 'data-g': gid },
+        el('td', null, el('div', { class: 'it-t' }, i.link ? el('a', { href: i.link, target: '_blank', rel: 'noopener', text: i.title }) : i.title, i.late ? el('span', { class: 'tag orange', style: 'margin-left:6px;height:18px;line-height:18px;padding:0 6px', text: 'late' }) : null),
+          i.note ? el('div', { class: 'it-n', text: i.note }) : null),
+        el('td', { class: 'muted', style: 'white-space:nowrap', text: fmtDue(i.due) }),
+        el('td', { class: 'r' }, scoreCell),
+        el('td', { class: 'r num', text: i.w != null ? f1(i.w) + '%' : '—' }),
+        el('td', null, i.source === 'placeholder' ? tag('Canvas 未发布 · 估算', null, 'dashed') : tag(st[0], st[1])));
+    });
+    rows.forEach(r => tbody.append(r));
+    btn.addEventListener('click', () => {
+      const ex = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!ex));
+      rows.forEach(r => r.hidden = ex);
+    });
+  });
+  const detail = el('div', { class: 'card' },
+    el('div', { class: 'card-h' }, el('div', null, el('div', { class: 'card-t' }, '分数明细'), el('div', { class: 'card-sub', text: '「占总评」是这一项在 100 分总评里值多少分；点类别名可以折叠' })),
+      el('a', { class: 'btn', href: `https://ufl.instructure.com/courses/${cc.canvasId}/grades`, target: '_blank', rel: 'noopener' }, 'Canvas 成绩页', el('span', { svg: ICON_EXT, style: 'display:inline-flex' }))),
+    el('div', { class: 'tbl-wrap' }, el('table', { class: 'tbl' },
+      el('thead', null, el('tr', null, el('th', { text: '项目' }), el('th', { text: '截止（美东）' }), el('th', { class: 'r', text: '得分' }), el('th', { class: 'r', text: '占总评' }), el('th', { text: '状态' }))),
+      tbody)));
+
+  // 目标测算
+  const target = el('div', { class: 'card', id: 'tg-' + cc.code });
+  renderTarget(c, target);
+
+  // 待办
+  const todo = el('div', { class: 'card', id: 'td-' + cc.code });
+  renderCourseTodos(c, todo);
+
+  // 口径
+  const notes = [];
+  notes.push('大数字是「按类别比例推算」的成绩：先算每个评分类别里已出分部分的得分率，再按类别占总评的比例加权（只算已经有成绩的类别）。「已评部分得分率」是已得分 ÷ 已评分，已评部分里各类别占比和期末不同，所以两者可能不一样。');
+  if (cc.canvasNote) notes.push(cc.canvasNote);
+  if (c.canvasCur != null) notes.push(`Canvas 上的原始数字：当前成绩 ${fx(c.canvasCur, 2)}%（只算已出分的部分）；没交的都按 0 分算是 ${fx(c.snap.final, 2)}%。`);
+  c.groups.forEach(g => { if (g.note) notes.push(`${g.label}：${g.note}`); });
+  c.bonus.forEach(b => notes.push(`${b.label}：${b.note}`));
+  const notesCard = el('div', { class: 'card' },
+    el('div', { class: 'card-h' }, el('div', { class: 'card-t' }, '计算说明')),
+    el('ul', { class: 'notes' }, notes.map(n => el('li', { text: n }))));
+
+  p.append(
+    el('div', { class: 'ctitle' },
+      el('div', null, el('h2', null, el('i'), `${cc.code} · ${cc.name}`), el('div', { class: 'sub', text: `${cc.zh} · 本页的「分」都指在 100 分总评里占的分数` })),
+      el('a', { class: 'btn', href: `https://ufl.instructure.com/courses/${cc.canvasId}`, target: '_blank', rel: 'noopener' }, '打开 Canvas 课程', el('span', { svg: ICON_EXT, style: 'display:inline-flex' }))),
+    el('div', { class: 'cgrid' },
+      el('div', { class: 'stack' }, hero, flow, detail),
+      el('div', { class: 'stack' }, target, todo, notesCard)));
+  return p;
+}
+
+function renderTarget(c, card) {
+  card.replaceChildren();
+  const bonusE = bonusEarned(c);
+  const left = 100 - c.T.graded;
+  const banked = c.T.earned + bonusE;
+  const att = c.bonus.find(b => b.kind === 'attendance');
+  card.append(el('div', { class: 'card-h' },
+    el('div', null, el('div', { class: 'card-t' }, '目标计算'), el('div', { class: 'card-sub', text: `剩下的 ${f1(left)} 分（含等待出分的部分）平均要拿多少` }))));
+  card.append(el('div', { class: 'targets' }, (c.cc.targets || C.targets).map(t => {
+    const need = left > 0 ? (t - banked) / left * 100 : (banked >= t ? 0 : Infinity);
+    const lt = letterOf(t, c.cc);
+    const cls = need <= 0 ? 'ok' : need <= 85 ? 'mid' : need <= 100 ? 'hard' : 'no';
+    const text = need <= 0 ? '已经稳了' : need > 100 ? '达不到' : need.toFixed(1) + '%';
+    return el('div', { class: 'tchip' },
+      el('div', { class: 'tchip-h' }, el('b', { text: `${t} 分以上` }), el('span', { text: `UF ${lt} · 格大 ${glasgowOf(lt)}` })),
+      el('div', { class: 'tchip-v ' + cls, text }),
+      el('div', { class: 'tchip-d', text: need <= 0 ? '剩下全拿 0 分也能达到' : need > 100 ? '剩下全满分也达不到' : '剩余部分的平均得分率' }));
+  })));
+  // 出勤天数（COP）
+  if (att) {
+    const out = el('output', { text: attendanceDays(att) });
+    const set = (d, label) => {
+      Store.copDays = Math.max(0, Math.min(att.need, d)); Store.save(); rerenderTargets();
+      const b = document.querySelector(`#tg-${c.cc.code} .stepper button[aria-label="${label}"]`); if (b) b.focus();
+    };
+    card.append(el('div', { class: 'sim' },
+      el('div', { class: 'sim-row' },
+        el('div', null, el('div', { text: 'iClicker 有效到课天数' }), el('div', { class: 'small muted', text: `满 ${att.need} 天 = +${att.max} 分 · 现在 +${f1(att.max * Math.min(attendanceDays(att), att.need) / att.need)}` })),
+        el('div', { class: 'stepper' },
+          el('button', { type: 'button', 'aria-label': '减少一天', text: '−', onclick: () => set(attendanceDays(att) - 1, '减少一天') }), out,
+          el('button', { type: 'button', 'aria-label': '增加一天', text: '+', onclick: () => set(attendanceDays(att) + 1, '增加一天') })))));
+  }
+  // 预测滑杆
+  const saved = SIM[c.cc.code];
+  const init = saved != null ? saved : Math.round(Math.max(0, Math.min(100, c.headline != null ? c.headline : 85)));
+  const sid = 'sim-' + c.cc.code;
+  const range = el('input', { type: 'range', id: sid, min: '0', max: '100', step: '1', value: String(init), 'aria-label': '剩余部分平均得分率' });
+  const pctOut = el('span', { class: 'num', style: 'font-size:15px;color:var(--text-1);font-weight:600' });
+  const projNum = el('span', { class: 'num' });
+  const projTags = el('span', { style: 'display:inline-flex;gap:6px' });
+  const upd = () => {
+    const r = +range.value;
+    range.style.setProperty('--p', r + '%');
+    pctOut.textContent = r + '%';
+    const proj = banked + left * r / 100;
+    projNum.textContent = proj.toFixed(1);
+    const lt = letterOf(proj, c.cc);
+    projTags.replaceChildren(gradeTag(lt, proj));
+  };
+  range.addEventListener('input', () => {
+    SIM[c.cc.code] = +range.value; upd();
+    try { localStorage.setItem('uf-dash-sim', JSON.stringify(SIM)); } catch (e) {}
+  });
+  card.append(el('div', { class: 'sim' },
+    el('div', { class: 'sim-row' }, el('span', { text: '如果剩下的平均拿到' }), pctOut),
+    range,
+    el('div', { class: 'sim-out' }, el('span', { class: 'muted small', text: '预计总评约' }), projNum, el('span', { class: 'muted', text: '分' }), projTags)));
+  upd();
+}
+
+function renderCourseTodos(c, card) {
+  card.replaceChildren();
+  const items = c.items.filter(isActionable);
+  const open = items.filter(i => isOpen(i) && !Store.done[i.key]).sort((a, b) => (a.due ? a.due.date : Infinity) - (b.due ? b.due.date : Infinity));
+  const done = items.filter(i => !isOpen(i) || Store.done[i.key]).sort((a, b) => (b.due ? b.due.date : 0) - (a.due ? a.due.date : 0));
+  card.append(el('div', { class: 'card-h' },
+    el('div', null, el('div', { class: 'card-t' }, '任务'), el('div', { class: 'card-sub', text: '按截止时间排序' })),
+    tag(`${open.length} 项未完成`, open.length ? 'orange' : 'green')));
+  if (!open.length) card.append(el('div', { class: 'empty', text: '这门课暂时没有任务' }));
+  open.forEach((i, idx) => card.append(todoRow(i, idx, { scope: 'c' })));
+  if (done.length) {
+    const box = el('div', { hidden: true });
+    done.forEach((i, idx) => box.append(todoRow(i, idx, { scope: 'c' })));
+    const btn = el('button', { class: 'linkbtn', type: 'button', 'aria-expanded': 'false' }, `已完成 ${done.length} 项`, el('span', { svg: ICON_CHEV, style: 'display:inline-flex' }));
+    btn.addEventListener('click', () => { const ex = btn.getAttribute('aria-expanded') === 'true'; btn.setAttribute('aria-expanded', String(!ex)); box.hidden = ex; });
+    card.append(el('div', { style: 'margin-top:8px' }, btn), box);
+  }
+}
+
+function rerenderTodos() {
+  const ov = document.getElementById('ov-todo');
+  if (ov) renderOverviewTodos(ov);
+  COURSES.forEach(c => { const n = document.getElementById('td-' + c.cc.code); if (n) renderCourseTodos(c, n); });
+}
+function rerenderTargets() {
+  COURSES.forEach(c => {
+    const n = document.getElementById('tg-' + c.cc.code); if (n) renderTarget(c, n);
+    const b = document.getElementById('bn-' + c.cc.code); if (b) renderBonusRows(c, b);
+  });
+}
+// 加分单独列出：不占总评的 100 分，另外加
+function renderBonusRows(c, box) {
+  box.replaceChildren();
+  if (!c.bonus.length) return;
+  box.append(el('div', { class: 'grow-sec', text: '加分（另外加在总评上，不占这 100 分）' }));
+  c.bonus.forEach(b => {
+    const isAtt = b.kind === 'attendance';
+    const days = isAtt ? attendanceDays(b) : null;
+    const e = isAtt ? b.max * Math.min(days, b.need) / b.need : (b.earned || 0);
+    const detail = isAtt ? `已到课 ${days} / ${b.need} 次` : (b.detail ? `得分 ${b.detail}` : '还没拿到');
+    const bar = el('div', { class: 'gbar' });
+    if (e > 0.001) bar.append(el('div', { class: 'seg earned', style: `width:${Math.min(100, e / b.max * 100)}%` }));
+    const row = el('div', { class: 'grow' },
+      el('div', { class: 'grow-l' }, el('div', { class: 'grow-n', text: b.label }), el('div', { class: 'grow-w', text: detail })),
+      bar,
+      el('div', { class: 'grow-r' }, el('span', { class: 'num', text: '+' + f1(e) }), el('span', { text: ` / ${b.max}` }), el('div', { class: 'muted', text: '已加 / 最多' })));
+    if (b.note) tipOn(row.querySelector('.grow-n'), b.label, [b.note]);
+    box.append(row);
+  });
+}
+Store.listeners.push(() => { rerenderTodos(); rerenderTargets(); });
+
+/* ---------- Tabs ---------- */
+const tabs = document.getElementById('tabs');
+const ink = el('span', { class: 'ink' });
+const TABS = [{ id: 'overview', label: 'Overview', code: '总览' }].concat(COURSES.map(c => ({ id: c.cc.code, label: c.cc.short, code: c.cc.code, color: c.cc.color })), [{ id: 'ops', label: '运维', code: '日志' }]);
+TABS.forEach(t => {
+  const b = el('button', { class: 'tab', role: 'tab', type: 'button', id: 'tab-' + t.id, 'aria-controls': 'p-' + t.id, 'aria-selected': 'false', tabindex: '-1', style: t.color ? ccVars(t.color) : null },
+    t.color ? el('span', { class: 'tdot' }) : null, t.label, el('span', { class: 'tcode', text: t.code }));
+  b.addEventListener('click', () => go(t.id));
+  tabs.append(b);
+});
+tabs.append(ink);
+tabs.addEventListener('keydown', e => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const i = TABS.findIndex(t => t.id === current);
+  const n = TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
+  go(n.id); document.getElementById('tab-' + n.id).focus();
+});
+function moveInk() {
+  const b = document.getElementById('tab-' + current);
+  if (!b) return;
+  ink.style.left = b.offsetLeft + 'px'; ink.style.width = b.offsetWidth + 'px';
+}
+let current = null;
+function go(id, opts) {
+  opts = opts || {};
+  if (!TABS.some(t => t.id === id)) id = 'overview';
+  if (id === current && !opts.force) return;
+  current = id;
+  // 后台重绘时关掉入场动画；用户真的切 Tab 时再恢复
+  if (!opts.force) document.getElementById('app').classList.remove('static');
+  TABS.forEach(t => {
+    const b = document.getElementById('tab-' + t.id), p = document.getElementById('p-' + t.id);
+    const on = t.id === id;
+    b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
+    p.classList.toggle('active', on);
+  });
+  moveInk();
+  const tb = document.getElementById('tab-' + id);
+  if (tb.offsetLeft < tabs.scrollLeft || tb.offsetLeft + tb.offsetWidth > tabs.scrollLeft + tabs.clientWidth) {
+    tabs.scrollTo({ left: tb.offsetLeft - 16, behavior: REDUCED ? 'auto' : 'smooth' });
+  }
+  if (!opts.quiet) countUp(document.getElementById('p-' + id));
+  if (id === 'overview') requestAnimationFrame(() => { const e = gEls(); if (e && !e.g.dataset.fitted) fitGantt(); });
+  try { localStorage.setItem('uf-dash-tab', id); } catch (e) {}
+  try { history.replaceState(null, '', '#' + id.toLowerCase()); } catch (e) {}
+  if (!opts.keepScroll) window.scrollTo(0, 0);
+}
+addEventListener('resize', moveInk);
+
+/* ---------- 同步状态 ---------- */
+const syncBox = document.getElementById('sync'), syncTxt = document.getElementById('syncText');
+function renderSync() {
+  syncBox.classList.remove('stale', 'busy');
+  if (!S.fetchedAt) { syncBox.classList.add('stale'); syncTxt.textContent = '没有 Canvas 快照'; return; }
+  const t = new Date(S.fetchedAt), hrs = (Date.now() - t) / 36e5;
+  const ago = hrs < 1 ? '刚刚' : hrs < 24 ? `${Math.floor(hrs)} 小时前` : `${Math.floor(hrs / 24)} 天前`;
+  syncTxt.replaceChildren(el('span', { class: 'full', text: 'Canvas 同步 ' }), el('span', { class: 'abs', text: `${fmtMD.format(t)} ${fmtHM.format(t)} · ` }), ago);
+  if (hrs > 36) syncBox.classList.add('stale');
+  syncBox.title = '成绩和截止时间来自 Canvas 快照（美东时间）';
+}
+function progress(text) { syncBox.classList.remove('stale'); syncBox.classList.add('busy'); syncTxt.textContent = text; }
+renderSync();
+setInterval(renderSync_ifIdle, 60000);
+function renderSync_ifIdle() { if (!refreshing) renderSync(); }
+
+
+/* ---------- 运维页 ---------- */
+const CHANGELOG = window.DASH_CHANGELOG || [];
+let RUNS = null; // null：还没连上数据库；[]：连上了但还没有记录
+let runsLimit = 12;
+const RUN_STATUS = {
+  ok: ['成功', 'green'], partial: ['部分完成', 'orange'], login_expired: ['登录过期', 'orange'],
+  chrome_offline: ['Chrome 未连接', 'orange'], invalid: ['数据校验失败', 'red'], error: ['出错', 'red']
+};
+const RUN_TRIGGER = { scheduled: '定时', manual: '手动 Run now', claude: '对话里手动' };
+const fmtRunTime = iso => { const d = new Date(iso); return isNaN(d) ? '—' : `${fmtMD.format(d)} ${fmtWD.format(d)} ${fmtHM.format(d)}`; };
+const agoText = d => { const h = (Date.now() - d) / 36e5; return h < 1 ? '刚刚' : h < 24 ? `${Math.floor(h)} 小时前` : `${Math.floor(h / 24)} 天前`; };
+function nextRunAt() { // 下一次 7:30 / 19:30（美东）
+  const now = new Date(), c = [];
+  for (let i = 0; i < 3; i++) { const k = keyOf(new Date(now.getTime() + i * 864e5)); c.push(parseDue(k + 'T07:30').date, parseDue(k + 'T19:30').date); }
+  return c.filter(d => d > now).sort((a, b) => a - b)[0];
+}
+function renderOps() {
+  const p = el('section', { class: 'panel', id: 'p-ops', role: 'tabpanel' });
+  const status = el('div', { class: 'card', id: 'ops-status' });
+  const runs = el('div', { class: 'card', id: 'ops-runs' });
+  renderOpsStatus(status); renderOpsRuns(runs);
+  p.append(
+    el('div', { class: 'ctitle' }, el('div', null, el('h2', null, '运维'),
+      el('div', { class: 'sub', text: '这个看板背后是一个每天自己去 Canvas 取数的小 Agent。这里记录它每次跑了什么、补进了哪些数据，以及看板本身的迭代。' }))),
+    el('div', { class: 'stack' }, status,
+      el('div', { class: 'cgrid' }, el('div', { class: 'stack' }, runs), el('div', { class: 'stack' }, renderOpsSystem())),
+      renderChangelog()));
+  return p;
+}
+function renderOpsStatus(card) {
+  card.replaceChildren();
+  const list = RUNS || [];
+  const lastOk = list.find(r => r.status === 'ok');
+  const week = list.filter(r => Date.now() - Date.parse(r.at) < 7 * 864e5);
+  const okN = week.filter(r => r.status === 'ok').length;
+  const nx = nextRunAt(), dataAt = S.fetchedAt ? new Date(S.fetchedAt) : null;
+  const kpi = (l, v, d) => el('div', { class: 'kpi' }, el('div', { class: 'kpi-l', text: l }), el('div', { class: 'kpi-v', text: v }), el('div', { class: 'kpi-d', text: d }));
+  const wait = RUNS ? '' : (window.claude ? '正在读取…' : '在 claude.ai 打开后显示');
+  card.append(
+    el('div', { class: 'card-h' }, el('div', null, el('div', { class: 'card-t' }, '系统状态'),
+      el('div', { class: 'card-sub', text: '定时任务每天 7:30 和 19:30（美东）运行；需要 Claude 桌面 App 开着、Chrome 里的 Canvas 保持登录' }))),
+    el('div', { class: 'ops-kpis' },
+      kpi('看板数据时间', dataAt ? `${fmtMD.format(dataAt)} ${fmtHM.format(dataAt)}` : '—', dataAt ? agoText(dataAt) : '还没有数据'),
+      kpi('最近一次成功运行', lastOk ? `${fmtMD.format(new Date(lastOk.at))} ${fmtHM.format(new Date(lastOk.at))}` : (RUNS ? '暂无' : '—'), lastOk ? (RUN_TRIGGER[lastOk.trigger] || '') : wait),
+      kpi('近 7 天成功 / 运行', RUNS ? `${okN} / ${week.length}` : '—', RUNS ? (week.length ? `成功率 ${Math.round(okN / week.length * 100)}%` : '这 7 天没有运行') : wait),
+      kpi('下次自动运行', nx ? `${fmtMD.format(nx)} ${fmtHM.format(nx)}` : '—', nx ? `${fmtWD.format(nx)} · 美东时间` : '')));
+}
+function renderOpsRuns(card) {
+  card.replaceChildren();
+  card.append(el('div', { class: 'card-h' },
+    el('div', null, el('div', { class: 'card-t' }, '运行日志'), el('div', { class: 'card-sub', text: '每次取数的结果和补进来的数据，最新的在最上面' })),
+    RUNS && RUNS.length ? tag(`共 ${RUNS.length} 次`, 'blue') : null));
+  if (RUNS == null) { card.append(el('div', { class: 'empty', text: window.claude ? '正在读取运行日志…' : '运行日志存在看板的云端数据库里，在 claude.ai 打开看板就能看到。' })); return; }
+  if (!RUNS.length) { card.append(el('div', { class: 'empty', text: '还没有运行记录。下一次定时运行后会出现在这里。' })); return; }
+  let streak = 0;
+  for (const r of RUNS) { if (r.status === 'ok') break; streak++; }
+  if (streak > 0) {
+    const r0 = RUNS[0], why = (RUN_STATUS[r0.status] || ['出错'])[0];
+    const fix = r0.status === 'login_expired' ? '在 Chrome 里打开一次 Canvas 重新登录，下一次运行就会恢复。'
+      : r0.status === 'chrome_offline' ? '运行时需要 Chrome 开着、Claude 扩展已连接。' : '';
+    card.append(el('div', { class: 'ops-alert', text: `最近 ${streak} 次运行没有拿到新数据（${why}）。${fix}` }));
+  }
+  const list = el('div', { class: 'runs' });
+  RUNS.slice(0, runsLimit).forEach(r => list.append(runRow(r)));
+  card.append(list);
+  if (RUNS.length > runsLimit) card.append(el('button', { class: 'linkbtn', type: 'button', onclick: () => { runsLimit += 20; renderOpsRuns(card); } }, `显示更早的 ${RUNS.length - runsLimit} 次`));
+}
+function runRow(r) {
+  const st = RUN_STATUS[r.status] || ['未知', ''];
+  const changes = Array.isArray(r.changes) ? r.changes.filter(x => typeof x === 'string') : [];
+  const pend = Array.isArray(r.unclassified) ? r.unclassified.filter(x => typeof x === 'string') : [];
+  const meta = [r.fetchedAt ? `Canvas 数据时间 ${fmtRunTime(r.fetchedAt)}` : null, r.dbVersion ? `数据库 v${r.dbVersion}` : null].filter(Boolean).join(' · ');
+  return el('div', { class: 'run run-' + (st[1] || 'gray') },
+    el('div', { class: 'run-dot' }),
+    el('div', { class: 'run-main' },
+      el('div', { class: 'run-h' }, el('span', { class: 'run-time', text: fmtRunTime(r.at) }), el('span', { class: 'run-trig', text: RUN_TRIGGER[r.trigger] || String(r.trigger || '') }), tag(st[0], st[1])),
+      r.summary ? el('div', { class: 'run-sum', text: String(r.summary) }) : null,
+      changes.length ? el('ul', { class: 'run-list' }, changes.map(t => el('li', { text: t }))) : null,
+      pend.length ? el('div', { class: 'run-pend' }, el('b', { text: '待归类：' }), pend.join('；')) : null,
+      meta ? el('div', { class: 'run-meta', text: meta }) : null));
+}
+function renderOpsLive() {
+  const s = document.getElementById('ops-status'); if (s) renderOpsStatus(s);
+  const r = document.getElementById('ops-runs'); if (r) renderOpsRuns(r);
+}
+function renderOpsSystem() {
+  const steps = [
+    ['定时触发', '每天 7:30 / 19:30（美东）由 Claude 桌面 App 的定时任务启动；也可以在 App 里手动 Run now。'],
+    ['读取 Canvas', '用你 Chrome 里已登录的 Canvas，只调用读取接口，一次读出五门课的作业、截止时间和成绩。'],
+    ['校验', '五门课都在、数据能解析、时间是刚取的才算有效；否则保留旧数据。'],
+    ['写入', '本地 snapshot.js 和看板的云端数据库（带版本号，冲突时重读再写）。'],
+    ['展示', '页面实时订阅数据库，开着也会自己更新，并弹出这次的变化。'],
+    ['记录', '每次运行写一条日志，就是左边的「运行日志」。']
+  ];
+  const edges = [
+    ['登录过期', '一遇到 UF 登录页就停，绝不输入账号密码，日志记「登录过期」。'],
+    ['Chrome 没开', '直接停下，记「Chrome 未连接」，下一次再试。'],
+    ['数据不完整', '校验不过就不覆盖，看板继续显示上一份。'],
+    ['认不出的新作业', '放进「其他 Canvas 条目」，不计入总评，日志里标「待归类」。'],
+    ['无人值守的权限', '定时运行不能发布网页、不能写 Google Drive，所以只写看板自己的数据库；网页也不能调用 Chrome，刷新按钮只读数据库。']
+  ];
+  return el('div', { class: 'card' },
+    el('div', { class: 'card-h' }, el('div', null, el('div', { class: 'card-t' }, '系统是怎么运作的'), el('div', { class: 'card-sub', text: '从取数到展示的每一步，以及边界情况怎么处理' }))),
+    el('ol', { class: 'flow' }, steps.map(([t, d]) => el('li', { class: 'flow-step' }, el('b', { text: t }), el('span', { text: d })))),
+    el('div', { class: 'grow-sec', text: '边界情况' }),
+    el('ul', { class: 'edges' }, edges.map(([t, d]) => el('li', null, el('b', { text: t + '：' }), d))));
+}
+function renderChangelog() {
+  const TYPE = { release: ['发布', 'blue'], fix: ['修复', 'green'], incident: ['事故', 'red'] };
+  return el('div', { class: 'card' },
+    el('div', { class: 'card-h' }, el('div', null, el('div', { class: 'card-t' }, '更新日志'), el('div', { class: 'card-sub', text: '看板从 10/18 上线以来的每一次迭代：改了什么、为什么改' })), tag(`${CHANGELOG.length} 条`, 'blue')),
+    CHANGELOG.length ? el('div', { class: 'cl' }, CHANGELOG.map(c => {
+      const t = TYPE[c.type] || ['更新', ''];
+      return el('div', { class: 'cl-item' },
+        el('div', { class: 'cl-side' }, el('div', { class: 'cl-date', text: String(c.date || '').slice(5).replace('-', '/') }), el('div', { class: 'cl-ver', text: c.ver || '' })),
+        el('div', { class: 'cl-body' },
+          el('div', { class: 'cl-h' }, tag(t[0], t[1]), el('span', { class: 'cl-title', text: c.title || '' })),
+          c.why ? el('div', { class: 'cl-why', text: c.why }) : null,
+          el('ul', { class: 'cl-points' }, (c.points || []).map(x => el('li', { text: x })))));
+    })) : el('div', { class: 'empty', text: '还没有更新记录' }));
+}
+
+/* ---------- 挂载 ---------- */
+const app = document.getElementById('app');
+function renderAll() {
+  hideTip();
+  app.replaceChildren(renderOverview(), ...COURSES.map(renderCourse), renderOps(),
+    el('div', { class: 'foot', text: '数据来自 Canvas 和各课大纲；时间均为美东时间。「格大」等级按格拉斯哥大学的 USA System 2 换算表折算。' }));
+}
+renderAll();
+
+/* ---------- 换用新快照 ---------- */
+function isValidSnap(s) {
+  return !!(s && typeof s.fetchedAt === 'string' && !isNaN(Date.parse(s.fetchedAt)) && s.courses &&
+    C.courses.every(c => s.courses[c.code] && Array.isArray(s.courses[c.code].groups)));
+}
+function diffSnaps(a, b) {
+  const index = s => {
+    const m = new Map();
+    Object.keys((s && s.courses) || {}).forEach(code => (s.courses[code].groups || []).forEach(g => (g.items || []).forEach(r => m.set(r[0], { code, r }))));
+    return m;
+  };
+  const A = index(a), B = index(b), out = [];
+  B.forEach(({ code, r }, id) => {
+    const o = A.get(id);
+    if (!o) { out.push(`${code} 新作业：${r[1]}`); return; }
+    if (o.r[4] == null && r[4] != null) out.push(`${code} ${r[1]} 出分 ${r[4]}/${r[2]}`);
+    else if (o.r[4] != null && r[4] != null && o.r[4] !== r[4]) out.push(`${code} ${r[1]} 分数 ${o.r[4]} → ${r[4]}`);
+    if (r[3] && o.r[3] !== r[3]) out.push(`${code} ${r[1]} 截止改为 ${fmtDue(parseDue(r[3]))}`);
+    if (!o.r[6] && r[6]) out.push(`${code} ${r[1]} 已提交`);
+  });
+  A.forEach(({ code, r }, id) => { if (!B.has(id)) out.push(`${code} 作业被移除：${r[1]}`); });
+  return out;
+}
+function applySnapshot(snap, force) {
+  if (!isValidSnap(snap)) return null;
+  if (!force && S.fetchedAt && Date.parse(snap.fetchedAt) <= Date.parse(S.fetchedAt)) return null;
+  const prev = S;
+  S = snap; NOW = new Date(); TODAY = keyOf(NOW);
+  COURSES = C.courses.map(buildCourse);
+  const y = window.scrollY;
+  const ge = gEls(), gLeft = ge ? ge.sc.scrollLeft : null;
+  app.classList.add('static');
+  renderAll();
+  go(current, { force: true, keepScroll: true, quiet: true });
+  window.scrollTo(0, y);
+  requestAnimationFrame(() => fitGantt(gLeft));
+  if (!refreshing) renderSync();
+  return diffSnaps(prev, snap);
+}
+function onRemoteSnapshot(snap, first) {
+  const changes = applySnapshot(snap, false);
+  if (changes && !first && !refreshing) toast('success', 'Canvas 数据已更新', changes.length ? changes : ['没有新成绩或 DDL 变化']);
+}
+
+/* ---------- 提示 ---------- */
+const toastBox = el('div', { class: 'toasts', 'aria-live': 'polite' });
+document.body.append(toastBox);
+function toast(type, title, lines, ms) {
+  const MAX = 6;
+  const list = (lines || []).slice(0, MAX);
+  if (lines && lines.length > MAX) list.push(`还有 ${lines.length - MAX} 项变化`);
+  const t = el('div', { class: 'toast ' + type, role: type === 'error' ? 'alert' : 'status' },
+    el('span', { class: 'ti', text: type === 'success' ? '✓' : type === 'info' ? 'i' : '!' }),
+    el('div', null, el('div', { class: 'toast-t', text: title }),
+      list.length === 1 ? el('div', { class: 'toast-d', text: list[0] }) : list.length ? el('ul', null, list.map(l => el('li', { text: l }))) : null));
+  const bar = document.querySelector('.topbar');
+  if (bar) toastBox.style.top = Math.round(bar.getBoundingClientRect().bottom + 12) + 'px';
+  toastBox.append(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 260); }, ms || (list.length > 1 ? 7000 : 4500));
+}
+
+/* ---------- 手动刷新 ---------- */
+// 页面本身连不上 Canvas（平台不允许网页调用 Chrome 扩展）。按钮重新读取数据库里最新的一份：
+// 定时任务每天 7:30 / 19:30 写入；想立刻更新，就在 Claude 桌面 App 里对定时任务点 Run now。
+const refreshBtn = document.getElementById('refreshBtn');
+function runNowHint() {
+  const t = S.fetchedAt ? `${fmtMD.format(new Date(S.fetchedAt))} ${fmtHM.format(new Date(S.fetchedAt))}` : '—';
+  return [`Canvas 数据同步于 ${t}（美东）。每天 7:30 和 19:30 自动更新。`,
+    '想立刻从 Canvas 拉取：在 Claude 桌面 App 左侧 Scheduled（定时任务）里，给「Canvas 成绩看板刷新」点 Run now，1–2 分钟后本页会自己更新。'];
+}
+async function reloadFromDb() {
+  await storeReady;
+  if (!Store.snapRef) return { status: 'no_db' };
+  let d = null;
+  for (let i = 0; i < 2 && !d; i++) {
+    try { d = await Store.snapRef.get(); }
+    catch (e) {
+      if (i === 0 && (!e || !e.code || e.code === 'unavailable')) { await new Promise(r => setTimeout(r, 400 + Math.random() * 800)); continue; }
+      return { status: 'read_failed' };
+    }
+  }
+  if (!d) return { status: 'read_failed' };
+  if (!d.exists) return { status: 'empty' };
+  let snap = null;
+  try { snap = JSON.parse((d.data() || {}).json); } catch (e) {}
+  return isValidSnap(snap) ? { status: 'ok', snap } : { status: 'bad' };
+}
+const changeLines = base => { const c = diffSnaps(base, S); return c.length ? c : ['没有新成绩或 DDL 变化']; };
+async function onRefresh() {
+  if (refreshing) return;
+  // 本地双击打开（没有 claude.ai 运行时）：重新载入页面，读最新的 snapshot.js
+  if (!window.claude) { progress('正在重新载入…'); location.reload(); return; }
+  refreshing = true;
+  const base = S; // 以点击那一刻为准，统计这次刷新期间的所有变化
+  refreshBtn.disabled = true; refreshBtn.classList.add('busy');
+  progress('正在载入最新数据…');
+  try {
+    const r = await reloadFromDb();
+    if (r.status === 'ok') applySnapshot(r.snap, false);
+    if (S !== base) toast('success', '已载入最新数据', changeLines(base));
+    else if (r.status === 'ok' || r.status === 'empty') toast('info', '已经是最新数据', runNowHint(), 8000);
+    else toast('warning', '读不到云端数据', [r.status === 'no_db' ? '这里连不上看板的数据库，页面显示的是上次发布时的数据。' : '数据库暂时没有响应，稍后再点一次刷新。']);
+  } finally {
+    refreshing = false;
+    refreshBtn.disabled = false; refreshBtn.classList.remove('busy');
+    renderSync();
+  }
+}
+refreshBtn.addEventListener('click', onRefresh);
+
+let start = 'overview';
+try { start = localStorage.getItem('uf-dash-tab') || start; } catch (e) {}
+const hash = (location.hash || '').slice(1).toUpperCase();
+if (hash) start = hash === 'OVERVIEW' ? 'overview' : hash === 'OPS' ? 'ops' : hash;
+go(start);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(moveInk);
+const storeReady = Store.connect();
+})();
+</script>
